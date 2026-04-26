@@ -1,0 +1,24 @@
+# Agent and local settings
+GEMINI.md
+.agents/
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+venv/
+.venv/
+env/
+
+# Node
+node_modules/
+dist/
+.next/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo

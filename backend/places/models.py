@@ -1,0 +1,44 @@
+from django.contrib.gis.db import models
+
+class Category(models.Model):
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(unique=True, max_length=255)
+    image_url = models.URLField(max_length=500, blank=True, null=True, help_text="Optional icon or image for the category")
+
+    class Meta:
+        verbose_name_plural = "Categories"
+
+    def __str__(self):
+        return self.name
+
+class Tag(models.Model):
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(unique=True, max_length=255)
+    image_url = models.URLField(max_length=500, blank=True, null=True, help_text="Optional icon or image for the tag/vibe")
+
+    def __str__(self):
+        return self.name
+
+class Place(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    address = models.CharField(max_length=500, blank=True, null=True)
+    
+    # Geography=True ensures distance calculations are in meters
+    location = models.PointField(geography=True)
+    
+    # External ID
+    kudago_id = models.IntegerField(unique=True, null=True, blank=True)
+    
+    # Soft deletes
+    is_active = models.BooleanField(default=True)
+    
+    # Relationships
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name="places")
+    tags = models.ManyToManyField(Tag, blank=True, related_name="places")
+    
+    # Media
+    photos = models.JSONField(default=list, blank=True, help_text="List of photo URLs")
+
+    def __str__(self):
+        return self.title

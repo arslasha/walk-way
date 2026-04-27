@@ -40,3 +40,8 @@ Before proposing a commit to the user, ensure the following project-specific rul
 2. **Migration Discipline (Django):** If you modified `models.py`, you MUST generate the migration files (`python manage.py makemigrations`) inside the Docker container BEFORE asking to commit. The generated `migrations/000X...py` files must be included in the same commit.
 3. **DESIGN.md Sync (Frontend):** If UI or Tailwind classes were changed, ensure `DESIGN.md` is updated and included in the commit.
 4. **Sync Before Build:** Before starting new work, check the recent commit history or fetch the latest changes to avoid duplicating logic or causing merge conflicts.
+
+## 6. Pull Requests & Merging
+- **Proactive PR Creation:** Do not ask the user about creating a Pull Request for every minor commit. Wait until a feature branch (or a logical phase of development) is fully implemented and tested.
+- **Approval Required:** Once the feature is fully completed and tested, you MUST ask the user for permission to create a Pull Request to merge the feature branch into `main`.
+- **Execution:** If the user approves, use the GitHub MCP server (`mcp_github_create_pull_request`) to create the PR, provide the PR link to the user, and if requested, merge it using `mcp_github_merge_pull_request`.

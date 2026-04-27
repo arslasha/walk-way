@@ -1,5 +1,4 @@
 # Agent and local settings
-GEMINI.md
 .agents/
 .env
 

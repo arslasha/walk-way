@@ -7,7 +7,7 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 
 ---
 
-## Phase 1: Core Search & Data Ingestion (Current)
+## Phase 1: Core Search & Data Ingestion (Current - v0.1 & v1.0 MVP)
 **Goal:** Establish the foundation, ingest real data, and enable complex vibe/spatial filtering.
 
 ### Completed Stages
@@ -28,23 +28,25 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
   - Successfully parsed initial test data (categories, places, and tags) into the local database.
 
 ### Next Steps (To-Do)
-- [ ] **REST API Foundation:** Create Django REST Framework (or Ninja) endpoints to expose places, categories, and tags to the frontend.
+- [ ] **REST API Foundation:** Create Django REST Framework endpoints to expose places, categories, and tags. Include `djangorestframework-gis` for spatial serialization.
 - [ ] **Spatial & Vibe Filtering:** Implement Django `Q` objects and PostGIS functions (e.g., `ST_DWithin`) to filter places by distance, category, and selected vibes.
-- [ ] **Frontend Initialization:** Setup the Next.js (App Router) foundation, integrating the Tailwind CSS design system (`DESIGN.md`) via Stitch MCP.
-- [ ] **LLM Vibe Generation:** Develop the Layer 3 execution script to automatically analyze KudaGo descriptions and generate emotional `is_vibe=True` tags using an LLM.
+- [ ] **LLM Vibe Generation & Icebreakers:** Develop the Layer 3 execution script to analyze descriptions, generate `is_vibe=True` tags, and create contextual "Icebreaker" text for dates.
+- [ ] **Frontend Initialization (v1.0):** Setup the Next.js (App Router) foundation, integrating the Tailwind CSS design system (`DESIGN.md`). Build a Tinder-like feed for exploring places.
 
 ---
 
-## Phase 2: Interactive Mapping & Advanced Routing
+## Phase 2: Interactive Mapping & Advanced Routing (v1.5)
 **Goal:** Provide visual exploration and intelligent route building.
-- [ ] Integrate Leaflet for interactive frontend mapping.
-- [ ] Develop custom walking route generation algorithms based on user duration and selected POIs.
-- [ ] Implement route sharing links.
+- [ ] **Leaflet Integration:** Introduce a map view for the filtered places.
+- [ ] **Loop Routing (Круговые маршруты):** Algorithm to build a closed-loop walking route (A -> B -> C -> A) matching a specific duration.
+- [ ] **Time-Aware Vibing:** Filter places based on the time of day (e.g., exclude closed places or "creepy at night" parks).
+- [ ] **Weather & Budget Filters:** Route through indoor spaces during rain, and add a `price_level` filter.
 
 ---
 
-## Phase 3: Social Features & User Accounts
-**Goal:** Transform the app into a social experience.
-- [ ] Implement User Authentication (NextAuth / Django Auth).
-- [ ] Allow users to save favorite places and custom routes.
-- [ ] Introduce a friend system and WebSockets for real-time chat/route collaboration.
+## Phase 3: Social Features & User Accounts (v2.0 & v3.0)
+**Goal:** Transform the app into a social experience and dating network.
+- [ ] **User Authentication:** NextAuth / Django Auth.
+- [ ] **Saved & Shared Routes:** Generate unique links to share a built route with a partner.
+- [ ] **WebSockets & Real-time:** Jointly edit a route with a friend in real-time.
+- [ ] **"Radar" Matching:** Find people nearby who want to walk with the same vibe.

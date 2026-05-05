@@ -26,12 +26,16 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
   - Developed an idempotent Django management command (`parse_kudago.py`) using the `requests` library.
   - Implemented category priority logic to select the most meaningful primary category from KudaGo.
   - Successfully parsed initial test data (categories, places, and tags) into the local database.
+- [x] **Frontend Initialization (v1.0):**
+  - Set up the Next.js (App Router) foundation.
+  - Integrated the Tailwind CSS design system (`DESIGN.md`).
+  - Built an explore feed skeleton.
 
 ### Next Steps (To-Do)
-- [ ] **REST API Foundation:** Create Django REST Framework endpoints to expose places, categories, and tags. Include `djangorestframework-gis` for spatial serialization.
-- [ ] **Spatial & Vibe Filtering:** Implement Django `Q` objects and PostGIS functions (e.g., `ST_DWithin`) to filter places by distance, category, and selected vibes.
-- [ ] **LLM Vibe Generation & Icebreakers:** Develop the Layer 3 execution script to analyze descriptions, generate `is_vibe=True` tags, and create contextual "Icebreaker" text for dates.
-- [ ] **Frontend Initialization (v1.0):** Setup the Next.js (App Router) foundation, integrating the Tailwind CSS design system (`DESIGN.md`). Build a Tinder-like feed for exploring places.
+- [ ] **REST API Foundation:** Create Django REST Framework endpoints to expose places, categories, and KudaGo tags. Include `djangorestframework-gis` for spatial serialization.
+- [ ] **Core Search & Filtering:** Implement backend filtering (distance via PostGIS `ST_DWithin`, category, basic tags) and connect it to the frontend.
+- [ ] **Explore Feed UI:** Finalize the frontend interface for browsing places (list/feed view without a map).
+- [ ] **End-to-End Testing:** Conduct full testing of the search flow only after the core functionality is built.
 
 ---
 
@@ -39,7 +43,7 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 **Goal:** Provide visual exploration and intelligent route building.
 - [ ] **Leaflet Integration:** Introduce a map view for the filtered places.
 - [ ] **Loop Routing (Круговые маршруты):** Algorithm to build a closed-loop walking route (A -> B -> C -> A) matching a specific duration.
-- [ ] **Time-Aware Vibing:** Filter places based on the time of day (e.g., exclude closed places or "creepy at night" parks).
+- [ ] **Time-Aware Routing:** Filter places based on the time of day (e.g., exclude closed places).
 - [ ] **Weather & Budget Filters:** Route through indoor spaces during rain, and add a `price_level` filter.
 
 ---
@@ -50,3 +54,8 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 - [ ] **Saved & Shared Routes:** Generate unique links to share a built route with a partner.
 - [ ] **WebSockets & Real-time:** Jointly edit a route with a friend in real-time.
 - [ ] **"Radar" Matching:** Find people nearby who want to walk with the same vibe.
+
+---
+
+## Backlog / Postponed Features
+- [ ] **LLM Vibe Generation & Icebreakers:** AI-based analysis of place descriptions to generate emotional `is_vibe=True` tags and conversational "Icebreakers". (Postponed indefinitely to focus on core mechanics).

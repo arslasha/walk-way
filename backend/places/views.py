@@ -1,19 +1,23 @@
-from rest_framework import generics
-from .models import Place, Category, Tag
-from .serializers import PlaceSerializer, CategorySerializer, TagSerializer
+from rest_framework import viewsets
+from rest_framework_gis.filters import InBBoxFilter
+from django_filters import rest_framework as filters
+from .models import Category, Tag, Place
+from .serializers import CategorySerializer, TagSerializer, PlaceSerializer
 from .filters import PlaceFilter
 
-class PlaceListView(generics.ListAPIView):
-    queryset = Place.objects.filter(is_active=True).prefetch_related('tags').select_related('category')
+class PlaceViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Place.objects.filter(is_active=True).select_related('category').prefetch_related('tags')
     serializer_class = PlaceSerializer
+    filter_backends = (filters.DjangoFilterBackend, InBBoxFilter)
     filterset_class = PlaceFilter
+    bbox_filter_field = 'location'
 
-class CategoryListView(generics.ListAPIView):
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    pagination_class = None
 
-class TagListView(generics.ListAPIView):
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    pagination_class = None
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_fields = ['is_vibe']

@@ -5,7 +5,7 @@ from .models import Category, Tag, Place
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug']
+        fields = ['id', 'name', 'slug', 'image_url']
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,4 +19,7 @@ class PlaceSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Place
         geo_field = "location"
-        fields = ['id', 'kudago_id', 'title', 'description', 'address', 'category', 'tags', 'photos', 'is_active']
+        fields = [
+            'id', 'title', 'description', 'address', 'category', 'tags',
+            'is_active', 'is_analyzed', 'photos', 'icebreakers'
+        ]

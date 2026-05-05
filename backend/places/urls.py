@@ -1,8 +1,12 @@
-from django.urls import path
-from .views import PlaceListView, CategoryListView, TagListView
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import PlaceViewSet, CategoryViewSet, TagViewSet
+
+router = DefaultRouter()
+router.register(r'places', PlaceViewSet, basename='place')
+router.register(r'categories', CategoryViewSet, basename='category')
+router.register(r'tags', TagViewSet, basename='tag')
 
 urlpatterns = [
-    path('', PlaceListView.as_view(), name='place-list'),
-    path('categories/', CategoryListView.as_view(), name='category-list'),
-    path('tags/', TagListView.as_view(), name='tag-list'),
+    path('', include(router.urls)),
 ]

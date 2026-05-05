@@ -1,0 +1,222 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* shadcn/ui сбрасывает дефолтные стили и добавляет свои CSS-переменные.
+   Мы переопределяем их ниже в :root и .dark — не трогаем этот импорт. */
+@import "shadcn/tailwind.css";
+
+/* ═══════════════════════════════════════════════════════════
+   Walk-Way — Дизайн-система «Dramatic Urbanism»
+   Светлая тема: Parchment (пергамент)
+   Тёмная тема: Midnight Metropolis (полночный мегаполис)
+   Шрифты: Epilogue (заголовки) + Inter (тело)
+═══════════════════════════════════════════════════════════ */
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Маппинг: семантические токены shadcn → наши CSS-переменные.
+     Tailwind видит только эти имена, поэтому важно держать их синхронизированными. */
+  --color-background:          var(--background);
+  --color-foreground:          var(--foreground);
+  --color-card:                var(--card);
+  --color-card-foreground:     var(--card-foreground);
+  --color-popover:             var(--popover);
+  --color-popover-foreground:  var(--popover-foreground);
+  --color-primary:             var(--primary);
+  --color-primary-foreground:  var(--primary-foreground);
+  --color-secondary:           var(--secondary);
+  --color-secondary-foreground:var(--secondary-foreground);
+  --color-muted:               var(--muted);
+  --color-muted-foreground:    var(--muted-foreground);
+  --color-accent:              var(--accent);
+  --color-accent-foreground:   var(--accent-foreground);
+  --color-destructive:         var(--destructive);
+  --color-border:              var(--border);
+  --color-input:               var(--input);
+  --color-ring:                var(--ring);
+
+  /* Sidebar */
+  --color-sidebar:                     var(--sidebar);
+  --color-sidebar-foreground:          var(--sidebar-foreground);
+  --color-sidebar-primary:             var(--sidebar-primary);
+  --color-sidebar-primary-foreground:  var(--sidebar-primary-foreground);
+  --color-sidebar-accent:              var(--sidebar-accent);
+  --color-sidebar-accent-foreground:   var(--sidebar-accent-foreground);
+  --color-sidebar-border:              var(--sidebar-border);
+  --color-sidebar-ring:                var(--sidebar-ring);
+
+  /* Border radii */
+  --radius-sm:  calc(var(--radius) * 0.6);
+  --radius-md:  calc(var(--radius) * 0.8);
+  --radius-lg:  var(--radius);
+  --radius-xl:  calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-full: 9999px;
+
+  /* ─── Фирменные цвета Walk-Way ───────────────────────────────────────────
+     Доступны как Tailwind-классы: bg-ww-ink, text-ww-orange и т.д. */
+  --color-ww-parchment:    #FAF8F4;
+  --color-ww-ink:          #0F0E17;
+  --color-ww-orange:       #E86A3A;
+  --color-ww-orange-light: #F08A64;
+  --color-ww-orange-dark:  #C4532A;
+  --color-ww-muted:        #888888;
+  --color-ww-border:       #E0DDD8;
+  --color-ww-footer-bg:    #F0EDE8;
+
+  /* ─── Цвета тёмной темы ──────────────────────────────────────────────── */
+  --color-ww-midnight:     #0F0E17;
+  --color-ww-surface-1:    #1A1926;
+  --color-ww-surface-2:    #252336;
+  --color-ww-ghost:        #2E2C42;
+  --color-ww-text-dim:     #8B8A9E;
+
+  /* ─── Алиасы шрифтов ───────────────────────────────────────────────────
+     var(--font-inter) и var(--font-epilogue) задаются в layout.tsx через next/font */
+  --font-sans:    var(--font-inter);
+  --font-heading: var(--font-epilogue);
+  --font-mono:    var(--font-geist-mono);
+}
+
+/* ═══ СВЕТЛАЯ ТЕМА (по умолчанию) ══════════════════════════════════════════
+   Основа — пергаментный #FAF8F4, акцент — оранжевый #E86A3A.
+   Все переменные shadcn переопределяются здесь, чтобы не зависеть от их дефолтов. */
+:root {
+  --background:          #FAF8F4;   /* Parchment */
+  --foreground:          #0F0E17;   /* Ink Black */
+  --card:                #FFFFFF;
+  --card-foreground:     #0F0E17;
+  --popover:             #FFFFFF;
+  --popover-foreground:  #0F0E17;
+  --primary:             #0F0E17;   /* Ink Black = primary action */
+  --primary-foreground:  #FFFFFF;
+  --secondary:           #F0EDE8;   /* Slightly darker parchment */
+  --secondary-foreground:#0F0E17;
+  --muted:               #F0EDE8;
+  --muted-foreground:    #888888;
+  --accent:              #E86A3A;   /* Accent Orange */
+  --accent-foreground:   #FFFFFF;
+  --destructive:         #D9360D;
+  --border:              #E0DDD8;
+  --input:               #E0DDD8;
+  --ring:                #E86A3A;
+  --radius:              0.75rem;
+
+  /* Sidebar */
+  --sidebar:                    #FAF8F4;
+  --sidebar-foreground:         #0F0E17;
+  --sidebar-primary:            #0F0E17;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent:             #F0EDE8;
+  --sidebar-accent-foreground:  #0F0E17;
+  --sidebar-border:             #E0DDD8;
+  --sidebar-ring:               #E86A3A;
+}
+
+/* ═══ ТЁМНАЯ ТЕМА ════════════════════════════════════════════════════════════
+   Активируется классом .dark на <html>. Тот же оранжевый акцент — остаётся
+   узнаваемым и в тёмном режиме. Фон — глубокий #0F0E17, почти чернильный. */
+.dark {
+  --background:          #0F0E17;   /* Midnight */
+  --foreground:          #F0EEE8;   /* Warm parchment text */
+  --card:                #1A1926;
+  --card-foreground:     #F0EEE8;
+  --popover:             #1A1926;
+  --popover-foreground:  #F0EEE8;
+  --primary:             #F0EEE8;
+  --primary-foreground:  #0F0E17;
+  --secondary:           #252336;
+  --secondary-foreground:#F0EEE8;
+  --muted:               #252336;
+  --muted-foreground:    #8B8A9E;
+  --accent:              #E86A3A;
+  --accent-foreground:   #FFFFFF;
+  --destructive:         #FF5733;
+  --border:              #2E2C42;
+  --input:               #2E2C42;
+  --ring:                #E86A3A;
+
+  --sidebar:                    #1A1926;
+  --sidebar-foreground:         #F0EEE8;
+  --sidebar-primary:            #E86A3A;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent:             #252336;
+  --sidebar-accent-foreground:  #F0EEE8;
+  --sidebar-border:             #2E2C42;
+  --sidebar-ring:               #E86A3A;
+}
+
+/* ═══ БАЗОВЫЙ СБРОС ══════════════════════════════════════════════════════════
+   Минимальный набор правил поверх Tailwind — только то, что нельзя сделать утилитами */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-inter), system-ui, sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-epilogue), var(--font-inter), system-ui, sans-serif;
+  }
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ═══ УТИЛИТЫ WALK-WAY ═══════════════════════════════════════════════════════
+   Кастомные классы, которых нет в базовом Tailwind.
+   Используем @layer utilities чтобы не конфликтовать с purge и приоритетами. */
+@layer utilities {
+  /* Основной контейнер страниц — 1280px с отступами 64px по бокам.
+     Используй .ww-container вместо Tailwind-шортхенда, чтобы ширина была единой. */
+  .ww-container {
+    @apply mx-auto w-full max-w-[1280px] px-16;
+  }
+
+  /* Размеры заголовков в editorial-стиле — clamp() адаптируется к экрану
+     без брейкпоинтов, сохраняя пропорции от 375px до 1440px+ */
+  .text-display {
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    text-transform: lowercase;
+  }
+  .text-headline {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  .text-label-caps {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* Pill-кнопки — основа CTA в дизайне Walk-Way.
+     Три варианта: тёмный (btn-primary), оранжевый (btn-accent), прозрачный (btn-ghost) */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-full bg-ww-ink px-6 py-3 text-sm font-semibold text-white transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg;
+  }
+  .btn-accent {
+    @apply inline-flex items-center gap-2 rounded-full bg-ww-orange px-6 py-3 text-sm font-semibold text-white transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 rounded-full border border-foreground/20 px-6 py-3 text-sm font-semibold transition-all duration-200 hover:border-foreground/40 hover:bg-foreground/5;
+  }
+
+  /* Вайб-чип — таблетка для фильтрации по настроению.
+     .chip-active накладывается поверх, когда фильтр активен */
+  .chip {
+    @apply inline-flex items-center rounded-full border border-ww-border px-4 py-1.5 text-sm font-medium transition-all duration-200 hover:border-ww-ink/30 cursor-pointer;
+  }
+  .chip-active {
+    @apply bg-ww-ink text-white border-ww-ink;
+  }
+}

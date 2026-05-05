@@ -43,7 +43,7 @@ class Command(BaseCommand):
 
         client = OpenAI(
             api_key=api_key,
-            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+            base_url="https://openrouter.ai/api/v1"
         )
 
         places_to_analyze = Place.objects.filter(is_analyzed=False).exclude(description__isnull=True).exclude(description__exact="")
@@ -59,7 +59,7 @@ class Command(BaseCommand):
 
             try:
                 response = client.chat.completions.create(
-                    model="gemini-2.0-flash", # Бесплатная модель через Google AI Studio
+                    model="openrouter/free",
                     messages=[
                         {"role": "system", "content": SYSTEM_PROMPT},
                         {"role": "user", "content": user_content}

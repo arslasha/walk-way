@@ -31,15 +31,17 @@ class Place(models.Model):
     # External ID
     kudago_id = models.IntegerField(unique=True, null=True, blank=True)
     
-    # Soft deletes
+    # Soft deletes & states
     is_active = models.BooleanField(default=True)
+    is_analyzed = models.BooleanField(default=False, help_text="True if processed by LLM for vibes/icebreakers")
     
     # Relationships
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name="places")
     tags = models.ManyToManyField(Tag, blank=True, related_name="places")
     
-    # Media
+    # Media & Content
     photos = models.JSONField(default=list, blank=True, help_text="List of photo URLs")
+    icebreakers = models.JSONField(default=list, blank=True, help_text="List of LLM-generated icebreakers")
 
     def __str__(self):
         return self.title

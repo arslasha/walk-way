@@ -9,7 +9,7 @@ export function VibeChipsSection() {
 
   return (
     <section className="ww-container pb-12">
-      <p className="mb-4 text-sm font-semibold text-muted-foreground">
+      <p className="mb-4 text-label-caps text-muted-foreground">
         выберите настроение
       </p>
       <div className="flex flex-wrap gap-2">

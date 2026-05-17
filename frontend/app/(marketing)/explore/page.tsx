@@ -1,64 +1,34 @@
 import { PlaceCard } from "@/components/features/places/PlaceCard";
-import type { Place } from "@/types/place";
+import { LocationFilter } from "@/components/features/places/LocationFilter";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { getPlaces, getTags } from "@/lib/api";
+import Link from "next/link";
 
-const MOCK_PLACES: Place[] = [
-  {
-    slug: "gorky-park-art",
-    name: "Гараж и окрестности",
-    category: "Арт-пространство",
-    address: "Парк Горького",
-    duration: "2-3 ч",
-    vibes: ["уличное-искусство", "природа"],
-  },
-  {
-    slug: "chistye-prudy-coffee",
-    name: "Скрытая кофейня на Чистых",
-    category: "Кофейня",
-    address: "Чистопрудный бульвар, 14",
-    duration: "1 ч",
-    vibes: ["кофе", "тихое"],
-  },
-  {
-    slug: "winzavod-gallery",
-    name: "ЦСИ Винзавод",
-    category: "Галерея",
-    address: "4-й Сыромятнический пер., 1/8",
-    duration: "2 ч",
-    vibes: ["уличное-искусство", "архитектура"],
-  },
-  {
-    slug: "danilovsky-market",
-    name: "Даниловский рынок",
-    category: "Рынок",
-    address: "Мытная ул., 74",
-    duration: "1.5 ч",
-    vibes: ["еда", "ветерок"],
-  },
-  {
-    slug: "ges-2",
-    name: "ГЭС-2",
-    category: "Культура",
-    address: "Болотная набережная, 15",
-    duration: "3 ч",
-    vibes: ["музеи", "архитектура"],
-  },
-  {
-    slug: "aptekarsky-ogorod",
-    name: "Аптекарский огород",
-    category: "Парк",
-    address: "Проспект Мира, 26с1",
-    duration: "1-2 ч",
-    vibes: ["природа", "тихое"],
-  },
-];
+export default async function ExplorePage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  // Await searchParams in Next.js 15+ (safe to do even in 14 depending on setup)
+  const resolvedParams = await searchParams;
+  const currentTags = typeof resolvedParams.tags === "string" ? resolvedParams.tags.split(",") : [];
+  
+  const places = await getPlaces({
+    tags: resolvedParams.tags as string,
+    category: resolvedParams.category as string,
+    lat: resolvedParams.lat ? parseFloat(resolvedParams.lat as string) : undefined,
+    lon: resolvedParams.lon ? parseFloat(resolvedParams.lon as string) : undefined,
+    radius: resolvedParams.radius ? parseFloat(resolvedParams.radius as string) : undefined,
+  });
 
-export default function ExplorePage() {
+  const allVibes = await getTags(true);
+
   return (
     <div className="pt-24 pb-32">
       <div className="ww-container">
         {/* Header / Title */}
         <div className="mb-8">
-          <h1 className="text-headline-xl font-bold text-foreground mb-4">
+          <h1 className="text-headline-xl text-foreground mb-4">
             исследуй
           </h1>
           <p className="text-body-lg text-muted-foreground max-w-2xl">
@@ -69,31 +39,60 @@ export default function ExplorePage() {
         {/* Filter Row */}
         <div className="mb-12 overflow-x-auto pb-4 no-scrollbar">
           <div className="flex flex-nowrap items-center gap-2">
-            <button className="chip chip-active">все вайбы</button>
-            <button className="chip whitespace-nowrap">кофе</button>
-            <button className="chip whitespace-nowrap">природа</button>
-            <button className="chip whitespace-nowrap">уличное-искусство</button>
-            <button className="chip whitespace-nowrap">музеи</button>
+            <Link
+              href="/explore"
+              className={`chip whitespace-nowrap ${currentTags.length === 0 ? "chip-active" : ""}`}
+            >
+              все вайбы
+            </Link>
             
-            <div className="w-px h-6 bg-border mx-2" />
+            <div className="w-px h-6 bg-border mx-2 shrink-0" />
             
-            <button className="chip whitespace-nowrap">1 ч</button>
-            <button className="chip whitespace-nowrap">2-3 ч</button>
+            <LocationFilter />
             
-            <div className="w-px h-6 bg-border mx-2" />
-            
-            <button className="chip whitespace-nowrap">один</button>
-            <button className="chip whitespace-nowrap">вдвоем</button>
-            <button className="chip whitespace-nowrap">компания</button>
+            <div className="w-px h-6 bg-border mx-2 shrink-0" />
+
+            {allVibes.map(vibe => {
+              const isActive = currentTags.includes(vibe.slug);
+              // Toggle logic: if active, remove it. If not, add it.
+              const newTags = isActive 
+                ? currentTags.filter(t => t !== vibe.slug)
+                : [...currentTags, vibe.slug];
+              
+              // We want to preserve other query parameters
+              const params = new URLSearchParams();
+              if (newTags.length > 0) params.set("tags", newTags.join(","));
+              if (resolvedParams.category) params.set("category", resolvedParams.category as string);
+              if (resolvedParams.lat) params.set("lat", resolvedParams.lat as string);
+              if (resolvedParams.lon) params.set("lon", resolvedParams.lon as string);
+              if (resolvedParams.radius) params.set("radius", resolvedParams.radius as string);
+              
+              const queryStr = params.toString();
+              const href = queryStr ? `/explore?${queryStr}` : "/explore";
+              
+              return (
+                <Link
+                  key={vibe.id}
+                  href={href}
+                  className={`chip whitespace-nowrap ${isActive ? "chip-active" : ""}`}
+                >
+                  {vibe.name}
+                </Link>
+              );
+            })}
           </div>
         </div>
 
         {/* Explore Feed: 2-col editorial grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {MOCK_PLACES.map((place) => (
-            <PlaceCard key={place.slug} place={place} />
-          ))}
-        </div>
+        {!places || places.features.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {places.features.map((place) => (
+              <PlaceCard key={place.id} place={place} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

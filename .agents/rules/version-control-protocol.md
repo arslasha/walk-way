@@ -6,8 +6,10 @@ trigger: always_on
 
 **Trigger:** You MUST strictly follow this protocol for all version control operations, code saving, branch management, and repository interactions.
 
-## 1. Tooling (GitHub MCP)
-- **Always Use GitHub MCP:** You must use the configured GitHub MCP server for committing, branching, and pushing code. 
+## 1. Tooling & Role Permissions (CRITICAL)
+- **Centralized Version Control:** ONLY the Orchestrator Agent (Lead PM / Architect) is permitted to manage version control. 
+- **Execution Agents Forbidden:** If you are an Execution Agent (e.g., Frontend Agent, Backend Agent), you are STRICTLY PROHIBITED from running Git commands, making commits, or creating branches. You must notify the Orchestrator when your code is ready for review and commit.
+- **Always Use GitHub MCP:** The Orchestrator must use the configured GitHub MCP server for committing, branching, and pushing code. 
 - Do not run raw `git` commands in the terminal unless the MCP server is unavailable or fails.
 
 ## 2. The "Pause & Ask" Rule (CRITICAL)

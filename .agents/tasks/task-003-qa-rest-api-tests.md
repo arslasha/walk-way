@@ -1,7 +1,7 @@
 # Task 003: QA REST API Auto-tests
 
 **Assignee:** QA
-**Status:** To Do
+**Status:** Done
 
 ## Context
 Write automated tests for the Django REST API endpoints, specifically focusing on geospatial filtering, vibe filtering, and place retrieval.

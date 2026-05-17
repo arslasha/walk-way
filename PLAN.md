@@ -31,10 +31,12 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
   - Integrated the Tailwind CSS design system (`DESIGN.md`).
   - Built an explore feed skeleton.
 
+- [x] **REST API Foundation:** Created Django REST Framework endpoints for places, categories, and tags. Integrated `djangorestframework-gis` and spatial filtering.
+- [x] **Core Search & Filtering:** Implemented backend filtering (distance via PostGIS `ST_DWithin`, category, basic tags) and connected it to the frontend via server-side fetches.
+- [x] **Explore Feed UI:** Finalized the frontend interface for browsing places with dynamic filters and a geolocation toggle.
+
 ### Next Steps (To-Do)
-- [ ] **REST API Foundation:** Create Django REST Framework endpoints to expose places, categories, and KudaGo tags. Include `djangorestframework-gis` for spatial serialization.
-- [ ] **Core Search & Filtering:** Implement backend filtering (distance via PostGIS `ST_DWithin`, category, basic tags) and connect it to the frontend.
-- [ ] **Explore Feed UI:** Finalize the frontend interface for browsing places (list/feed view without a map).
+- [ ] **UI/UX Polish:** Implement Loading Skeletons for the feed, proper Empty States for filtered results, and Toast notifications for geolocation errors.
 - [ ] **End-to-End Testing:** Conduct full testing of the search flow only after the core functionality is built.
 
 ---

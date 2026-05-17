@@ -1,7 +1,7 @@
 # Task 002: Frontend Initialization
 
 **Assignee:** Frontend
-**Status:** To Do
+**Status:** Done
 
 ## Context
 Setup the initial Next.js application foundation using App Router and Tailwind CSS. Implement the base structure for the Tinder-like feed. Must follow the mandatory design protocol.

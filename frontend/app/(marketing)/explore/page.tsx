@@ -1,6 +1,7 @@
-import { PlaceCard } from "@/components/features/places/PlaceCard";
 import { LocationFilter } from "@/components/features/places/LocationFilter";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { ExploreFeed } from "@/components/features/places/ExploreFeed";
+import { RouteDrawer } from "@/components/features/route/RouteDrawer";
+import { DraggableScrollContainer } from "@/components/ui/DraggableScrollContainer";
 import { getPlaces, getTags } from "@/lib/api";
 import Link from "next/link";
 
@@ -37,11 +38,12 @@ export default async function ExplorePage({
         </div>
 
         {/* Filter Row */}
-        <div className="mb-12 overflow-x-auto pb-4 no-scrollbar">
+        <DraggableScrollContainer className="mb-12 pb-4">
           <div className="flex flex-nowrap items-center gap-2">
             <Link
               href="/explore"
               className={`chip whitespace-nowrap ${currentTags.length === 0 ? "chip-active" : ""}`}
+              draggable={false}
             >
               все вайбы
             </Link>
@@ -75,25 +77,20 @@ export default async function ExplorePage({
                   key={vibe.id}
                   href={href}
                   className={`chip whitespace-nowrap ${isActive ? "chip-active" : ""}`}
+                  draggable={false}
                 >
                   {vibe.name}
                 </Link>
               );
             })}
           </div>
-        </div>
+        </DraggableScrollContainer>
 
         {/* Explore Feed: 2-col editorial grid */}
-        {!places || places.features.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {places.features.map((place) => (
-              <PlaceCard key={place.id} place={place} />
-            ))}
-          </div>
-        )}
+        <ExploreFeed initialPlaces={places?.features || []} />
       </div>
+      
+      <RouteDrawer />
     </div>
   );
 }

@@ -36,6 +36,7 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 - [x] **Explore Feed UI:** Finalized the frontend interface for browsing places with dynamic filters and a geolocation toggle.
 
 ### Next Steps (To-Do)
+- [ ] **UI/UX Polish:** Implement Loading Skeletons for the feed, proper Empty States for filtered results, and Toast notifications for geolocation errors.
 - [ ] **End-to-End Testing:** Conduct full testing of the search flow only after the core functionality is built.
 
 ---

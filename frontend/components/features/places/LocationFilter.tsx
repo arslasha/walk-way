@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 export function LocationFilter() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
 
   const isActive = searchParams.has("lat") && searchParams.has("lon");
 
@@ -22,12 +22,11 @@ export function LocationFilter() {
     }
 
     if (!navigator.geolocation) {
-      setErrorMsg("Геолокация не поддерживается браузером");
+      toast.error("Геолокация не поддерживается браузером");
       return;
     }
 
     setIsLoading(true);
-    setErrorMsg("");
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -42,7 +41,7 @@ export function LocationFilter() {
       },
       (error) => {
         setIsLoading(false);
-        setErrorMsg("Не удалось получить геопозицию");
+        toast.error("Не удалось получить геопозицию");
         console.error("Geolocation error:", error);
       }
     );
@@ -59,7 +58,6 @@ export function LocationFilter() {
       >
         {isLoading ? "Поиск..." : isActive ? "Сбросить гео" : "Рядом со мной"}
       </button>
-      {errorMsg && <span className="text-sm text-red-500">{errorMsg}</span>}
     </div>
   );
 }

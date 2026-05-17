@@ -6,7 +6,7 @@ from .serializers import CategorySerializer, TagSerializer, PlaceSerializer
 from .filters import PlaceFilter
 
 class PlaceViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Place.objects.filter(is_active=True).select_related('category').prefetch_related('tags')
+    queryset = Place.objects.filter(is_active=True).select_related('category').prefetch_related('tags').order_by('id')
     serializer_class = PlaceSerializer
     filter_backends = (filters.DjangoFilterBackend, InBBoxFilter)
     filterset_class = PlaceFilter

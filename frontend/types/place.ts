@@ -1,36 +1,51 @@
-export type Vibe =
-  | "все"
-  | "ветерок"
-  | "уличное-искусство"
-  | "кофе"
-  | "природа"
-  | "музеи"
-  | "еда"
-  | "архитектура"
-  | "тихое";
-
-export type PlaceCategory =
-  | "Кафе"
-  | "Парк"
-  | "Музей"
-  | "Кофейня"
-  | "Арт-пространство"
-  | "Рынок"
-  | "Галерея"
-  | "Культура";
-
-export interface Place {
-  slug: string;
+export interface Category {
+  id: number;
   name: string;
-  category: PlaceCategory;
-  address: string;
-  duration: string;
-  vibes: Vibe[];
-  imageUrl?: string;
+  slug: string;
+  image_url: string | null;
+}
+
+export interface Tag {
+  id: number;
+  name: string;
+  slug: string;
+  image_url: string | null;
+  is_vibe: boolean;
+}
+
+export interface PlaceProperties {
+  id: number;
+  title: string;
+  description: string;
+  address: string | null;
+  category: Category | null;
+  tags: Tag[];
+  is_active: boolean;
+  is_analyzed: boolean;
+  photos: string[];
+  icebreakers: string[];
+}
+
+export interface PlaceFeature {
+  type: "Feature";
+  id: number;
+  geometry: {
+    type: "Point";
+    coordinates: [number, number]; // [longitude, latitude]
+  };
+  properties: PlaceProperties;
+}
+
+export interface PlaceFeatureCollection {
+  type: "FeatureCollection";
+  features: PlaceFeature[];
 }
 
 export interface PlaceFilters {
-  vibe: Vibe | null;
-  category: PlaceCategory | null;
-  maxDuration: number | null;
+  tags?: string; // comma-separated tag slugs
+  category?: string; // category slug
+  in_bbox?: string; // min_lon,min_lat,max_lon,max_lat
+  lat?: number;
+  lon?: number;
+  radius?: number;
 }

@@ -1,40 +1,24 @@
 import { PlaceCard } from "@/components/features/places/PlaceCard";
 import { PlaceCardSmall } from "@/components/features/places/PlaceCardSmall";
-import type { Place } from "@/types/place";
+import { getPlaces } from "@/lib/api";
 
-const FEATURED_PLACE: Place = {
-  slug: "sad-ermitazh",
-  name: "Сад Эрмитаж",
-  category: "Парк",
-  address: "ул. Каретный ряд, 3",
-  duration: "~30 мин",
-  vibes: ["тихое", "природа"],
-};
+export async function FeaturedPlacesSection() {
+  let featuredPlaces: any[] = [];
+  try {
+    const data = await getPlaces();
+    featuredPlaces = data.features.slice(0, 3);
+  } catch (error) {
+    console.error("Failed to fetch featured places:", error);
+    // Fallback or empty state could be handled here
+  }
 
-const SIDE_PLACES: Place[] = [
-  {
-    slug: "artplay",
-    name: "Artplay Центр",
-    category: "Арт-пространство",
-    address: "Нижняя Сыромятническая, 10",
-    duration: "~45 мин",
-    vibes: ["уличное-искусство", "архитектура"],
-  },
-  {
-    slug: "morozeika",
-    name: "Скрытая Морозейка",
-    category: "Кофейня",
-    address: "ул. Моросейка, 10",
-    duration: "~20 мин",
-    vibes: ["кофе"],
-  },
-];
+  const mainPlace = featuredPlaces[0];
+  const sidePlaces = featuredPlaces.slice(1, 3);
 
-export function FeaturedPlacesSection() {
   return (
     <section className="ww-container pb-20">
       <div className="mb-8 flex items-center justify-between">
-        <h2 className="text-headline">сейчас в топе</h2>
+        <h2 className="text-headline-lg text-foreground">сейчас в топе</h2>
         <a
           href="/explore"
           className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -44,10 +28,16 @@ export function FeaturedPlacesSection() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-[1.4fr_1fr]">
-        <PlaceCard place={FEATURED_PLACE} />
+        {mainPlace ? (
+          <PlaceCard place={mainPlace} />
+        ) : (
+          <div className="h-80 rounded-[40px] bg-card border border-border flex items-center justify-center text-muted-foreground">
+            Нет доступных мест
+          </div>
+        )}
         <div className="flex flex-col gap-4">
-          {SIDE_PLACES.map((place) => (
-            <PlaceCardSmall key={place.slug} place={place} />
+          {sidePlaces.map((place) => (
+            <PlaceCardSmall key={place.id} place={place} />
           ))}
         </div>
       </div>

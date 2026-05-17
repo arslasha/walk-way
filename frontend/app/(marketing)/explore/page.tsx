@@ -1,5 +1,6 @@
 import { PlaceCard } from "@/components/features/places/PlaceCard";
 import { LocationFilter } from "@/components/features/places/LocationFilter";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { getPlaces, getTags } from "@/lib/api";
 import Link from "next/link";
 
@@ -84,9 +85,7 @@ export default async function ExplorePage({
 
         {/* Explore Feed: 2-col editorial grid */}
         {!places || places.features.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-body-lg text-muted-foreground">Ничего не найдено. Попробуйте изменить фильтры.</p>
-          </div>
+          <EmptyState />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {places.features.map((place) => (

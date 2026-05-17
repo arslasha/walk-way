@@ -36,14 +36,19 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 - [x] **Explore Feed UI:** Finalized the frontend interface for browsing places with dynamic filters and a geolocation toggle.
 
 ### Next Steps (To-Do)
-- [ ] **UI/UX Polish:** Implement Loading Skeletons for the feed, proper Empty States for filtered results, and Toast notifications for geolocation errors.
-- [ ] **End-to-End Testing:** Conduct full testing of the search flow only after the core functionality is built.
+- [x] **UI/UX Polish:** Implement Loading Skeletons for the feed, proper Empty States for filtered results, and Toast notifications for geolocation errors.
+- [x] **End-to-End Testing:** Conduct full testing of the search flow only after the core functionality is built.
 
 ---
 
 ## Phase 2: Interactive Mapping & Advanced Routing (v1.5)
 **Goal:** Provide visual exploration and intelligent route building.
-- [ ] **Leaflet Integration:** Introduce a map view for the filtered places.
+
+### Current Tasks
+- [x] **Task 007:** Frontend Global Route State & Sidebar (Zustand, RouteDrawer, PlaceCard UI, /map stub).
+
+### Backlog
+- [ ] **Leaflet/MapLibre Integration:** Introduce a map view (`/map`) for the filtered places.
 - [ ] **Loop Routing (Круговые маршруты):** Algorithm to build a closed-loop walking route (A -> B -> C -> A) matching a specific duration.
 - [ ] **Time-Aware Routing:** Filter places based on the time of day (e.g., exclude closed places).
 - [ ] **Weather & Budget Filters:** Route through indoor spaces during rain, and add a `price_level` filter.

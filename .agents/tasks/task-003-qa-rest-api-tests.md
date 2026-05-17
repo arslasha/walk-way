@@ -8,8 +8,8 @@ Write automated tests for the Django REST API endpoints, specifically focusing o
 - **References:** `PLAN.md` (Phase 1).
 
 ## Acceptance Criteria
-- [ ] PyTest (or default Django Test framework) configured for the `places` app.
-- [ ] Tests written to validate REST API responses, ensuring correct structure (e.g., GeoJSON if applicable).
-- [ ] Tests written to validate spatial filtering logic (e.g., `ST_DWithin` radius search).
-- [ ] Tests written to validate category and vibe filtering logic.
-- [ ] All tests pass successfully locally.
+- [x] PyTest (or default Django Test framework) configured for the `places` app.
+- [x] Tests written to validate REST API responses, ensuring correct structure (e.g., GeoJSON if applicable).
+- [x] Tests written to validate spatial filtering logic (e.g., `ST_DWithin` radius search).
+- [x] Tests written to validate category and vibe filtering logic.
+- [x] All tests pass successfully locally.

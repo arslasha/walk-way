@@ -26,6 +26,6 @@ During the completion of Phase 1 (Task 005), we successfully integrated the back
 - If necessary, consult Stitch MCP for generating the Empty State UI or Skeleton loaders.
 
 ## Status
-- [ ] Implement `loading.tsx` and skeletons.
-- [ ] Create `EmptyState` component and integrate it into the feed.
-- [ ] Set up Toast notifications and update `LocationFilter.tsx`.
+- [x] Implement `loading.tsx` and skeletons.
+- [x] Create `EmptyState` component and integrate it into the feed.
+- [x] Set up Toast notifications and update `LocationFilter.tsx`.

@@ -274,9 +274,29 @@ All buttons: `border-radius: 10px`, `padding: 10px 20px`, `font-weight: 600`, `f
 
 ---
 
-## 12. Change Log
+## 12. Global Themes & Map Styles
+
+### 12.1 Theme Switcher
+- Configured site-wide dark/light mode toggle in Navigation Bar using `next-themes`.
+- Transition states: Instant styling adjustment via CSS variables, standardizing dark/light aesthetics.
+
+### 12.2 Theme-Aware MapLibre Styles
+- **Light Theme Map:** Powered by `positron-gl-style` (Carto Positron clone). Clean, elegant, light grey background with minimal distraction.
+- **Dark Theme Map:** Powered by `dark-matter-gl-style` (Carto Dark Matter clone). Dramatic, high-contrast dark aesthetic aligning with "Dramatic Urbanism".
+- **Dynamic Transition:** Automatic detection of `resolvedTheme` with dynamic map stylesheet swap upon change.
+
+### 12.3 Route Markers & Visualizations
+- Custom styled circular index markers for route stops (`useRouteStore`).
+- Active color scheme: `--accent` (`#E86A3A`) for marker body, high contrast text inside indicating sequence index.
+- Interactive tooltip overlay on hover showing place name and core information.
+- Preloader styling: High contrast animated pulse overlay matching brand identity to hide MapLibre setup jitter.
+
+---
+
+## 13. Change Log
 
 | Date | Change | Author |
 |---|---|---|
 | 2026-04-29 | Initial design system v1 created. Explore page (light + dark). | agent |
 | 2026-04-29 | **v2 Dramatic Urbanism upgrade.** 80-120px display type, 40px card radius, floating Hero cards, editorial asymmetric grid, CTA banner. Landing page added. | agent |
+| 2026-05-18 | **Theme Integration & Interactive Map.** Added `next-themes` support, custom dynamic map styling (light/dark Matter), premium markers, and pulse preloader. | agent |

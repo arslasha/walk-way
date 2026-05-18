@@ -47,7 +47,7 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 ### Current Tasks
 - [x] **Task 007:** Frontend Global Route State & Sidebar (Zustand, RouteDrawer, PlaceCard UI, /map stub).
 - [x] **Task 008:** MapLibre Integration & Route Visualization.
-- [ ] **Task 009:** Map Bottom Sheet & Interactive UX (Vaul).
+- [x] **Task 009:** Map Bottom Sheet & Interactive UX (Vaul, responsive multi-snap drawer, quick-add recommendations, map-marker synchronization).
 - [ ] **Task 010:** Backend Routing API & "Along the Way" Spatial Queries.
 
 ### Backlog

@@ -300,3 +300,20 @@ All buttons: `border-radius: 10px`, `padding: 10px 20px`, `font-weight: 600`, `f
 | 2026-04-29 | Initial design system v1 created. Explore page (light + dark). | agent |
 | 2026-04-29 | **v2 Dramatic Urbanism upgrade.** 80-120px display type, 40px card radius, floating Hero cards, editorial asymmetric grid, CTA banner. Landing page added. | agent |
 | 2026-05-18 | **Theme Integration & Interactive Map.** Added `next-themes` support, custom dynamic map styling (light/dark Matter), premium markers, and pulse preloader. | agent |
+| 2026-05-18 | **Map Bottom Sheet & Interactive UX.** Added `vaul` responsive bottom sheet with custom metrics, quick-add recommendations, and map marker centering/highlighting. | agent |
+
+---
+
+## 14. Responsive Floating Sidebar Layout
+
+### 14.1 Responsive Positioning
+- **Unified Sidebar Panel:** Completely removed the mobile bottom drawer (`vaul` drawer) to eliminate screen clutter and satisfy user preferences.
+- **Mobile View:** Floats beautifully at `left-4 right-4 top-[88px] bottom-4` directly overlaying the map with a high-fidelity translucent blurred container.
+- **Desktop View:** Positioned on the left at `left-6 top-[96px] bottom-6 w-96` leaving breathing room at all edges.
+- **Header Navbar Integration:** Positioned perfectly below the standard website `Navbar` (`h-[72px]`) to ensure seamless navigation, theme toggling, and auth access.
+
+### 14.2 Content & Interactions
+- Unifies real-time route metrics (Distance, Estimated walking duration, Steps), a sortable interactive list of points (`@dnd-kit/sortable`), and a quick-add search/category recommended grid into a single, clean vertical scroll area.
+- **Marker Alignment:** Clicking a location flies the camera to the marker and expands a custom tooltip.
+- **Desktop Shifting:** Utilizes left padding inside map `fitBounds` bounds-fitting to center markers in the right visible area of the viewport.
+

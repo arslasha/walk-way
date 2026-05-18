@@ -300,7 +300,9 @@ All buttons: `border-radius: 10px`, `padding: 10px 20px`, `font-weight: 600`, `f
 | 2026-04-29 | Initial design system v1 created. Explore page (light + dark). | agent |
 | 2026-04-29 | **v2 Dramatic Urbanism upgrade.** 80-120px display type, 40px card radius, floating Hero cards, editorial asymmetric grid, CTA banner. Landing page added. | agent |
 | 2026-05-18 | **Theme Integration & Interactive Map.** Added `next-themes` support, custom dynamic map styling (light/dark Matter), premium markers, and pulse preloader. | agent |
-| 2026-05-18 | **Map Bottom Sheet & Interactive UX.** Added `vaul` responsive bottom sheet with custom metrics, quick-add recommendations, and map marker centering/highlighting. | agent |
+| 2026-05-18 | **Map Bottom Sheet & Interactive UX.** Added `vaul` responsive bottom sheet with custom metrics, quick-add recommendations, and map-marker centering/highlighting. | agent |
+| 2026-05-18 | **Smart POIs & Route Path Rendering.** Added interactive map polyline paths with glowing effects, along-route "Smart POIs" dots, and interactive "Add to route" click popups. | agent |
+
 
 ---
 

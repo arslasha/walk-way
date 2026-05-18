@@ -39,9 +39,11 @@ With the frontend map (`react-map-gl`) and route drawer (`vaul`) implemented, we
 - Follow `version-control-protocol.md`. Do not commit directly.
 
 ## Status Check
-- [ ] ORS client implemented and API keys set up.
-- [ ] `/api/routes/calculate/` endpoint returns accurate walking paths.
-- [ ] PostGIS `ST_DWithin` spatial query successfully finds places within a buffer of the path.
-- [ ] MapLibre map renders the route polyline successfully.
-- [ ] Smart POIs appear on the map and can be added to the route.
-- [ ] "По пути" section displays at the top of the Explore feed.
+- [x] ORS client implemented and API keys set up.
+- [x] `/api/routes/calculate/` endpoint returns accurate walking paths.
+- [x] PostGIS `ST_DWithin` spatial query successfully finds places within a buffer of the path.
+- [x] MapLibre map renders the route polyline successfully.
+- [x] Smart POIs appear on the map and can be added to the route.
+- [x] "По пути" section displays at the top of the Explore feed.
+
+

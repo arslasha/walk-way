@@ -9,7 +9,8 @@ import {
   Compass, 
   Coffee, 
   Palmtree, 
-  Building2
+  Building2,
+  Loader2
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -37,136 +38,20 @@ interface RouteBottomSheetProps {
   activePlaceId: number | null;
 }
 
-// Curated mock places in Moscow for quick-add recommendations
-const MOCK_RECOMMENDED_PLACES: PlaceFeature[] = [
-  {
-    type: "Feature",
-    id: 9901,
-    geometry: { type: "Point", coordinates: [37.6015, 55.7601] },
-    properties: {
-      id: 9901,
-      title: "Кофемания на Большой Никитской",
-      description: "Легендарные кофейни Москвы с безупречным сервисом и фирменным рафом.",
-      address: "ул. Большая Никитская, 22",
-      category: { id: 1, name: "Кафе", slug: "cafe", image_url: null },
-      tags: [{ id: 1, name: "Кофе и архитектура", slug: "coffee", image_url: null, is_vibe: true }],
-      is_active: true,
-      is_analyzed: true,
-      photos: [],
-      icebreakers: []
-    }
-  },
-  {
-    type: "Feature",
-    id: 9902,
-    geometry: { type: "Point", coordinates: [37.6212, 55.7515] },
-    properties: {
-      id: 9902,
-      title: "Парк Зарядье",
-      description: "Современный урбанистический парк с ледяной пещерой и парящим мостом.",
-      address: "ул. Варварка, домовладение 6",
-      category: { id: 2, name: "Парки", slug: "park", image_url: null },
-      tags: [{ id: 2, name: "Парки и природа", slug: "nature", image_url: null, is_vibe: true }],
-      is_active: true,
-      is_analyzed: true,
-      photos: [],
-      icebreakers: []
-    }
-  },
-  {
-    type: "Feature",
-    id: 9903,
-    geometry: { type: "Point", coordinates: [37.6051, 55.7412] },
-    properties: {
-      id: 9903,
-      title: "ГМИИ им. А.С. Пушкина",
-      description: "Один из крупнейших в России музеев зарубежного искусства.",
-      address: "ул. Волхонка, 12",
-      category: { id: 3, name: "Музеи", slug: "museum", image_url: null },
-      tags: [{ id: 3, name: "Музеи", slug: "museums", image_url: null, is_vibe: true }],
-      is_active: true,
-      is_analyzed: true,
-      photos: [],
-      icebreakers: []
-    }
-  },
-  {
-    type: "Feature",
-    id: 9904,
-    geometry: { type: "Point", coordinates: [37.6011, 55.7282] },
-    properties: {
-      id: 9904,
-      title: "Музей современного искусства Гараж",
-      description: "Прогрессивное арт-пространство в самом сердце Парка Горького.",
-      address: "ул. Крымский Вал, 9, стр. 32",
-      category: { id: 4, name: "Галереи", slug: "gallery", image_url: null },
-      tags: [{ id: 4, name: "Уличное искусство", slug: "street-art", image_url: null, is_vibe: true }],
-      is_active: true,
-      is_analyzed: true,
-      photos: [],
-      icebreakers: []
-    }
-  },
-  {
-    type: "Feature",
-    id: 9905,
-    geometry: { type: "Point", coordinates: [37.6082, 55.7651] },
-    properties: {
-      id: 9905,
-      title: "Бар Тебурасика",
-      description: "Аутентичный японский татиноми-бар во двориках Страстного бульвара.",
-      address: "Страстной бульвар, 7, стр. 3",
-      category: { id: 5, name: "Бары", slug: "bar", image_url: null },
-      tags: [{ id: 5, name: "Еда и рынки", slug: "food", image_url: null, is_vibe: true }],
-      is_active: true,
-      is_analyzed: true,
-      photos: [],
-      icebreakers: []
-    }
-  }
-];
-
-export function calculateSimulatedRouteMetrics(route: PlaceFeature[]) {
-  if (route.length < 2) {
-    return {
-      distance: 0,
-      duration: 0,
-      steps: 0,
-    };
-  }
-
-  let totalDistance = 0;
-  for (let i = 0; i < route.length - 1; i++) {
-    const p1 = route[i].geometry.coordinates;
-    const p2 = route[i + 1].geometry.coordinates;
-
-    const R = 6371;
-    const dLat = ((p2[1] - p1[1]) * Math.PI) / 180;
-    const dLon = ((p2[0] - p1[0]) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((p1[1] * Math.PI) / 180) *
-        Math.cos((p2[1] * Math.PI) / 180) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c;
-    totalDistance += d;
-  }
-
-  const adjustedDistance = totalDistance * 1.25;
-  const durationMinutes = Math.round((adjustedDistance / 4.8) * 60);
-  const totalSteps = Math.round(adjustedDistance * 1350);
-
-  return {
-    distance: parseFloat(adjustedDistance.toFixed(1)),
-    duration: durationMinutes,
-    steps: totalSteps,
-  };
-}
-
 export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSheetProps) {
-  const { route, removePlace, reorderPlaces, addPlace, clearRoute } = useRouteStore();
+  const { 
+    route, 
+    removePlace, 
+    reorderPlaces, 
+    addPlace, 
+    clearRoute,
+    distance,
+    duration,
+    steps,
+    alongRoutePlaces,
+    isCalculatingRoute,
+    isFetchingAlongRoute
+  } = useRouteStore();
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -187,8 +72,6 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
   }, []);
 
   if (!mounted) return null;
-
-  const metrics = calculateSimulatedRouteMetrics(route);
 
   const formatDuration = (mins: number) => {
     if (mins === 0) return "—";
@@ -213,13 +96,13 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
       return;
     }
     toast.success("Маршрут успешно запущен!", {
-      description: `Расстояние: ${metrics.distance} км, примерное время: ${formatDuration(metrics.duration)}. Приятной прогулки!`,
+      description: `Расстояние: ${distance} км, примерное время: ${formatDuration(duration)}. Приятной прогулки!`,
       duration: 5000,
     });
   };
 
   // Filter recommendations based on category click and search input
-  const filteredRecommendations = MOCK_RECOMMENDED_PLACES.filter((place) => {
+  const filteredRecommendations = alongRoutePlaces.filter((place) => {
     const matchesSearch = place.properties.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       place.properties.address?.toLowerCase().includes(searchQuery.toLowerCase());
     
@@ -324,9 +207,16 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
 
       {/* Filtered quick recommendations */}
       <div className="max-h-40 overflow-y-auto no-scrollbar space-y-2 mt-1">
-        {filteredRecommendations.length === 0 ? (
+        {isFetchingAlongRoute ? (
+          <div className="flex flex-col items-center justify-center py-6">
+            <Loader2 className="h-5 w-5 animate-spin text-accent mb-2" />
+            <p className="text-[10px] text-muted-foreground">Ищем интересные места по пути...</p>
+          </div>
+        ) : filteredRecommendations.length === 0 ? (
           <p className="text-[11px] text-muted-foreground py-3 text-center">
-            Все места добавлены или ничего не найдено.
+            {route.length === 0 
+              ? "Добавьте первую точку, чтобы увидеть рекомендации по пути!"
+              : "Все места добавлены или ничего не найдено."}
           </p>
         ) : (
           filteredRecommendations.map((place) => (
@@ -380,23 +270,29 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
         </div>
 
         {/* Quick Metrics display */}
-        <div className="grid grid-cols-3 gap-1.5 p-2.5 bg-secondary/40 rounded-3xl mb-3 shrink-0 text-center border border-border/40">
+        <div className="grid grid-cols-3 gap-1.5 p-2.5 bg-secondary/40 rounded-3xl mb-3 shrink-0 text-center border border-border/40 relative overflow-hidden">
+          {isCalculatingRoute && (
+            <div className="absolute right-3 top-3 flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent"></span>
+            </div>
+          )}
           <div>
             <div className="text-[10px] text-muted-foreground font-semibold">Время</div>
             <div className="text-xs font-bold text-foreground tracking-tight mt-0.5">
-              {formatDuration(metrics.duration)}
+              {formatDuration(duration)}
             </div>
           </div>
           <div className="border-x border-border/50">
             <div className="text-[10px] text-muted-foreground font-semibold">Длина</div>
             <div className="text-xs font-bold text-foreground tracking-tight mt-0.5">
-              {metrics.distance} км
+              {distance} км
             </div>
           </div>
           <div>
             <div className="text-[10px] text-muted-foreground font-semibold">Шаги</div>
             <div className="text-xs font-bold text-foreground tracking-tight mt-0.5">
-              {metrics.steps.toLocaleString("ru-RU")}
+              {steps.toLocaleString("ru-RU")}
             </div>
           </div>
         </div>

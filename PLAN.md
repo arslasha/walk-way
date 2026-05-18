@@ -64,10 +64,15 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 
 ## Phase 3: Social Features & User Accounts (v2.0 & v3.0)
 **Goal:** Transform the app into a collaborative, community-driven social app and dating network.
-- [ ] **JWT Auth & Registration:** Secure access/refresh tokens with optional TOTP-based 2FA.
-- [ ] **User Profiles:** Editable profiles (photo/avatar upload and compress, unique nickname, custom bio, vibe preferences).
-- [ ] **Personal Folders & Collections:** Save places to named collections (e.g. "Quiet Cafes", "Date Night Spots") with customizable public/private visibility.
-- [ ] **Social Graph (Friends):** Find other users by nickname, send/accept friend requests, view friends' public profiles and their collections.
+
+### Current Tasks
+- [x] **Task 015:** JWT Authentication, Registration & Optional 2FA (Backend).
+- [ ] **Task 016:** Auth Forms, User Dashboard & Profile Editing UI (Frontend).
+- [ ] **Task 017:** Personal Folders & Place Collections (Backend & Frontend).
+- [ ] **Task 018:** Social Graph, User Search & Friend Profiles (Backend & Frontend).
+- [ ] **Task 019:** QA: Security, Accounts, Collections & Social API Auto-tests.
+
+### Backlog & Future Tasks
 - [ ] **Saved & Shared Routes:** Generate unique URLs to share custom walking routes with friends or partners.
 - [ ] **WebSockets & Real-Time Collaboration:** Jointly build and edit a route with a friend on the map in real-time.
 - [ ] **"Radar" Matching:** Spatial discoverability to find people nearby who want to walk with the same vibe.

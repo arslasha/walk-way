@@ -35,6 +35,11 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 - [x] **Core Search & Filtering:** Implemented backend filtering (distance via PostGIS `ST_DWithin`, category, basic tags) and connected it to the frontend via server-side fetches.
 - [x] **Explore Feed UI:** Finalized the frontend interface for browsing places with dynamic filters and a geolocation toggle.
 
+- [x] **CORS & Map Route Rendering Fixes (Task 013):**
+  - Integrated `django-cors-headers` package and middleware to solve cross-origin blocking on route calculations.
+  - Resolved `500 Internal Server Error` on Tag and Category viewsets by disabling Global GeoJson Pagination for standard non-spatial endpoints.
+  - Fixed MapLibre GL polyline route layers disappearing during theme switching by dynamically keying the `<Source>` layer with the `resolvedTheme` state, forcing clean reactive remounting on style reload.
+
 ### Next Steps (To-Do)
 - [x] **UI/UX Polish:** Implement Loading Skeletons for the feed, proper Empty States for filtered results, and Toast notifications for geolocation errors.
 - [x] **End-to-End Testing:** Conduct full testing of the search flow only after the core functionality is built.
@@ -50,9 +55,9 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 - [x] **Task 009:** Map Bottom Sheet & Interactive UX (Vaul, responsive multi-snap drawer, quick-add recommendations, map-marker synchronization).
 - [x] **Task 010:** Backend Routing API & "Along the Way" Spatial Queries.
 - [ ] **Task 011:** Frontend Routing Polish & Loop Routes (Круговые маршруты).
-- [x] **Task 012:** Backend Advanced Filters (Time, Weather, Budget) & Loop Logic.
-- [ ] **Task 013:** Fix Route Rendering & Client-Side CORS Issues (django-cors-headers, MapLibre layer fixes, tag viewset pagination).
-- [ ] **Task 014:** QA Routing & Spatial API Auto-tests (PyTest backend mocks, Zustand store unit tests, map/bottom-sheet integration).
+- [ ] **Task 012:** Backend Advanced Filters (Time, Weather, Budget) & Loop Logic.
+- [x] **Task 013:** Fix Route Rendering & Client-Side CORS Issues (django-cors-headers, MapLibre layer fixes, tag viewset pagination).
+- [x] **Task 014:** QA Routing & Spatial API Auto-tests (PyTest backend mocks, Zustand store unit tests, map/bottom-sheet integration).
 
 ### Backlog
 - [ ] **Saved & Shared Routes:** Moving towards phase 3, but preparing route models on backend.

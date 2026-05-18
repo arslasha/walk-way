@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo } from "react";
-import Map, { Marker, NavigationControl, MapRef } from "react-map-gl/maplibre";
+import Map, { Marker, NavigationControl, MapRef, Source, Layer } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import maplibregl from "maplibre-gl";
 import { useRouteStore } from "@/store/routeStore";
@@ -17,13 +17,22 @@ const MOSCOW_CENTER = {
 };
 
 export default function MapPage() {
-  const { route } = useRouteStore();
+  const { route, routeGeometry, alongRoutePlaces, addPlace } = useRouteStore();
   const mapRef = useRef<MapRef>(null);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [hasFitBounds, setHasFitBounds] = useState(false);
   const [activePlaceId, setActivePlaceId] = useState<number | null>(null);
+
+  const geojsonRoute = useMemo(() => {
+    if (!routeGeometry) return null;
+    return {
+      type: "Feature" as const,
+      properties: {},
+      geometry: routeGeometry,
+    };
+  }, [routeGeometry]);
 
   useEffect(() => {
     setMounted(true);
@@ -113,6 +122,40 @@ export default function MapPage() {
         >
           <NavigationControl position="bottom-right" />
 
+          {/* Render Walking Route Polyline with a Glowing Accent Line */}
+          {geojsonRoute && (
+            <Source id="route-source" type="geojson" data={geojsonRoute}>
+              {/* Outer glow layer */}
+              <Layer
+                id="route-line-glow"
+                type="line"
+                layout={{
+                  "line-join": "round",
+                  "line-cap": "round",
+                }}
+                paint={{
+                  "line-color": "#E86A3A",
+                  "line-width": 10,
+                  "line-opacity": 0.25,
+                }}
+              />
+              {/* Core solid layer */}
+              <Layer
+                id="route-line-core"
+                type="line"
+                layout={{
+                  "line-join": "round",
+                  "line-cap": "round",
+                }}
+                paint={{
+                  "line-color": "#E86A3A",
+                  "line-width": 4.5,
+                  "line-opacity": 0.95,
+                }}
+              />
+            </Source>
+          )}
+
           {/* Render Route Markers */}
           {route.map((place, index) => (
             <Marker
@@ -157,6 +200,54 @@ export default function MapPage() {
               </div>
             </Marker>
           ))}
+
+          {/* Render Smart POIs Along the Route */}
+          {alongRoutePlaces
+            .filter((place) => !route.some((p) => p.id === place.id))
+            .map((place) => (
+              <Marker
+                key={`along-${place.id}`}
+                longitude={place.geometry.coordinates[0]}
+                latitude={place.geometry.coordinates[1]}
+                anchor="center"
+              >
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActivePlaceId(place.id);
+                  }}
+                  className="relative group cursor-pointer"
+                >
+                  <div
+                    className={cn(
+                      "w-3 h-3 rounded-full shadow-md border border-white transition-all duration-300",
+                      activePlaceId === place.id
+                        ? "bg-accent scale-150 ring-2 ring-accent/30"
+                        : "bg-accent/40 hover:bg-accent hover:scale-125"
+                    )}
+                  />
+                  
+                  {/* Popup/tooltip showing title and an Add button */}
+                  {activePlaceId === place.id && (
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+                      <div className="bg-surface text-text-primary text-xs font-semibold p-2.5 rounded-2xl shadow-xl border border-border flex flex-col items-center gap-1.5 min-w-[140px]">
+                        <div className="text-center font-bold leading-tight">{place.properties.title}</div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addPlace(place);
+                            setActivePlaceId(null);
+                          }}
+                          className="bg-accent hover:bg-accent-hover text-white text-[10px] font-bold px-2 py-1 rounded-full w-full transition-colors"
+                        >
+                          Добавить
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Marker>
+            ))}
         </Map>
       </div>
 

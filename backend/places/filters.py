@@ -12,9 +12,47 @@ class PlaceFilter(filters.FilterSet):
     lon = filters.NumberFilter(method='filter_by_distance')
     radius = filters.NumberFilter(method='filter_by_distance')
 
+    # Advanced filter parameters
+    current_time = filters.CharFilter(method='filter_by_current_time')
+    weather = filters.CharFilter(method='filter_by_weather')
+    price_level = filters.CharFilter(method='filter_by_price_level')
+
     class Meta:
         model = Place
-        fields = ['category', 'is_active']
+        fields = ['category', 'is_active', 'price_level', 'is_indoor']
+
+    def filter_by_current_time(self, queryset, name, value):
+        if not value:
+            return queryset
+            
+        from .utils import get_day_and_time, is_open_at
+        day, time_str = get_day_and_time(value)
+        
+        # Candidate filtering: select IDs and opening_hours
+        places_data = queryset.values_list('id', 'opening_hours')
+        
+        open_ids = []
+        for pk, schedule in places_data:
+            if is_open_at(schedule, day, time_str):
+                open_ids.append(pk)
+                
+        return queryset.filter(id__in=open_ids)
+
+    def filter_by_weather(self, queryset, name, value):
+        if value == 'rain':
+            # Filter indoor places when it is raining
+            return queryset.filter(is_indoor=True)
+        return queryset
+
+    def filter_by_price_level(self, queryset, name, value):
+        if not value:
+            return queryset
+            
+        try:
+            levels = [int(x.strip()) for x in value.split(',')]
+            return queryset.filter(price_level__in=levels)
+        except ValueError:
+            return queryset
 
     def filter_by_tags(self, queryset, name, value):
         # Allow multiple tags separated by comma

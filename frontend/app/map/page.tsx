@@ -124,7 +124,7 @@ export default function MapPage() {
 
           {/* Render Walking Route Polyline with a Glowing Accent Line */}
           {geojsonRoute && (
-            <Source id="route-source" type="geojson" data={geojsonRoute}>
+            <Source key={resolvedTheme} id="route-source" type="geojson" data={geojsonRoute}>
               {/* Outer glow layer */}
               <Layer
                 id="route-line-glow"

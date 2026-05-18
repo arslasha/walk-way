@@ -43,5 +43,21 @@ class Place(models.Model):
     photos = models.JSONField(default=list, blank=True, help_text="List of photo URLs")
     icebreakers = models.JSONField(default=list, blank=True, help_text="List of LLM-generated icebreakers")
 
+    # Time, Weather, and Budget Filters
+    opening_hours = models.JSONField(default=dict, blank=True, null=True, help_text="Structured opening hours JSON")
+    opening_hours_text = models.CharField(max_length=500, blank=True, null=True, help_text="Raw opening hours string from KudaGo")
+    price_level = models.IntegerField(
+        default=1,
+        choices=[
+            (0, 'Free'),
+            (1, 'Low'),
+            (2, 'Medium'),
+            (3, 'High')
+        ],
+        help_text="Price level: 0=Free, 1=Low, 2=Medium, 3=High"
+    )
+    is_indoor = models.BooleanField(default=False, help_text="True if the place is indoors, False if outdoors")
+
     def __str__(self):
         return self.title
+

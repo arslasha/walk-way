@@ -50,17 +50,22 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 - [x] **Task 009:** Map Bottom Sheet & Interactive UX (Vaul, responsive multi-snap drawer, quick-add recommendations, map-marker synchronization).
 - [x] **Task 010:** Backend Routing API & "Along the Way" Spatial Queries.
 - [ ] **Task 011:** Frontend Routing Polish & Loop Routes (Круговые маршруты).
-- [ ] **Task 012:** Backend Advanced Filters (Time, Weather, Budget) & Loop Logic.
+- [x] **Task 012:** Backend Advanced Filters (Time, Weather, Budget) & Loop Logic.
+- [ ] **Task 013:** Fix Route Rendering & Client-Side CORS Issues (django-cors-headers, MapLibre layer fixes, tag viewset pagination).
+- [ ] **Task 014:** QA Routing & Spatial API Auto-tests (PyTest backend mocks, Zustand store unit tests, map/bottom-sheet integration).
 
 ### Backlog
 - [ ] **Saved & Shared Routes:** Moving towards phase 3, but preparing route models on backend.
 
 ## Phase 3: Social Features & User Accounts (v2.0 & v3.0)
-**Goal:** Transform the app into a social experience and dating network.
-- [ ] **User Authentication:** NextAuth / Django Auth.
-- [ ] **Saved & Shared Routes:** Generate unique links to share a built route with a partner.
-- [ ] **WebSockets & Real-time:** Jointly edit a route with a friend in real-time.
-- [ ] **"Radar" Matching:** Find people nearby who want to walk with the same vibe.
+**Goal:** Transform the app into a collaborative, community-driven social app and dating network.
+- [ ] **JWT Auth & Registration:** Secure access/refresh tokens with optional TOTP-based 2FA.
+- [ ] **User Profiles:** Editable profiles (photo/avatar upload and compress, unique nickname, custom bio, vibe preferences).
+- [ ] **Personal Folders & Collections:** Save places to named collections (e.g. "Quiet Cafes", "Date Night Spots") with customizable public/private visibility.
+- [ ] **Social Graph (Friends):** Find other users by nickname, send/accept friend requests, view friends' public profiles and their collections.
+- [ ] **Saved & Shared Routes:** Generate unique URLs to share custom walking routes with friends or partners.
+- [ ] **WebSockets & Real-Time Collaboration:** Jointly build and edit a route with a friend on the map in real-time.
+- [ ] **"Radar" Matching:** Spatial discoverability to find people nearby who want to walk with the same vibe.
 
 ---
 

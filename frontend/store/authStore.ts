@@ -152,7 +152,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
           throw new Error(data.detail || data.error || "Неверный email или пароль");
         }
 
-        if (data.2fa_required || data.two_factor_required) {
+        if (data["2fa_required"] || data.two_factor_required) {
           set({
             twoFactorRequired: true,
             preAuthToken: data.pre_auth_token,

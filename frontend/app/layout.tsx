@@ -32,6 +32,7 @@ export const metadata: Metadata = {
 };
 
 import { Toaster } from "sonner";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 export default function RootLayout({
   children,
@@ -39,14 +40,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="ru"
-      className={`${inter.variable} ${epilogue.variable} h-full antialiased`}
-    >
-      <body className="flex min-h-full flex-col bg-background text-foreground">
-        {children}
-        <Toaster position="bottom-right" />
-      </body>
-    </html>
+      <html
+        lang="ru"
+        className={`${inter.variable} ${epilogue.variable} h-full antialiased`}
+        suppressHydrationWarning
+      >
+        <body className="flex min-h-full flex-col bg-background text-foreground">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+            <Toaster position="bottom-right" />
+          </ThemeProvider>
+        </body>
+      </html>
   );
 }

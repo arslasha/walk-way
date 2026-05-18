@@ -44,3 +44,36 @@ export async function getTags(isVibe?: boolean): Promise<Tag[]> {
   const data = await res.json();
   return Array.isArray(data) ? data : (data.results || []);
 }
+
+export async function calculateRoute(placeIds: number[]): Promise<{ geometry: any; distance: number; duration: number }> {
+  const res = await fetch(`${API_BASE_URL}/routes/calculate/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ places: placeIds }),
+  });
+  if (!res.ok) {
+    throw new Error("Failed to calculate route");
+  }
+  return res.json();
+}
+
+export async function getPlacesAlongRoute(
+  route: any,
+  buffer: number = 150,
+  excludeIds: number[] = []
+): Promise<PlaceFeatureCollection> {
+  const res = await fetch(`${API_BASE_URL}/places/along-route/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ route, buffer, exclude_ids: excludeIds }),
+  });
+  if (!res.ok) {
+    throw new Error("Failed to fetch places along route");
+  }
+  return res.json();
+}
+

@@ -5,6 +5,7 @@ import { MapPin, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NAV_LINKS } from "@/constants/navigation";
 import { useActivePath } from "@/hooks/use-active-path";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 function NavLink({ href, label }: { href: string; label: string }) {
   const isActive = useActivePath(href);
@@ -41,12 +42,15 @@ export function Navbar() {
           ))}
         </nav>
 
+
         <div className="hidden items-center gap-3 md:flex">
           <button className="flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
             <MapPin className="h-3.5 w-3.5" />
             москва
             <ChevronDown className="h-3.5 w-3.5" />
           </button>
+          
+          <ThemeToggle />
 
           <Link
             href="/auth/login"

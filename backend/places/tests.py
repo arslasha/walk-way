@@ -22,7 +22,10 @@ def setup_data(db):
         title="Center Cafe",
         location=Point(30.3158, 59.9390, srid=4326), # lon, lat
         category=category,
-        is_active=True
+        is_active=True,
+        price_level=0,
+        is_indoor=False,
+        opening_hours={'mon': [['10:00', '18:00']], 'tue': [['10:00', '18:00']], 'wed': [['10:00', '18:00']], 'thu': [['10:00', '18:00']], 'fri': [['10:00', '18:00']], 'sat': [['10:00', '18:00']], 'sun': [['10:00', '18:00']]}
     )
     place1.tags.add(tag1)
     
@@ -31,7 +34,10 @@ def setup_data(db):
         title="Nearby Cafe",
         location=Point(30.3230, 59.9390, srid=4326),
         category=category,
-        is_active=True
+        is_active=True,
+        price_level=1,
+        is_indoor=True,
+        opening_hours={'mon': [['12:00', '03:00']], 'tue': [['12:00', '03:00']], 'wed': [['12:00', '03:00']], 'thu': [['12:00', '03:00']], 'fri': [['12:00', '03:00']], 'sat': [['12:00', '03:00']], 'sun': [['12:00', '03:00']]}
     )
     place2.tags.add(tag1, tag2)
     
@@ -40,7 +46,10 @@ def setup_data(db):
         title="Far Cafe",
         location=Point(30.3428, 59.9390, srid=4326),
         category=category,
-        is_active=True
+        is_active=True,
+        price_level=2,
+        is_indoor=True,
+        opening_hours={'mon': [['12:00', '23:00']], 'tue': [['12:00', '23:00']], 'wed': [['12:00', '23:00']], 'thu': [['12:00', '23:00']], 'fri': [['12:00', '23:00']], 'sat': [['12:00', '23:00']], 'sun': [['12:00', '23:00']]}
     )
     place3.tags.add(tag2)
 
@@ -214,4 +223,95 @@ def test_places_along_route_exclude_ids(api_client, setup_data):
     features = response.json()['features']
     assert len(features) == 1
     assert features[0]['properties']['title'] == "Nearby Cafe"
+
+
+@pytest.mark.django_db
+def test_place_filter_by_price_level(api_client, setup_data):
+    url = reverse('place-list')
+    
+    # Filter by price level 0 (Center Cafe)
+    response_0 = api_client.get(url, {'price_level': '0'})
+    assert len(response_0.json()['features']) == 1
+    assert response_0.json()['features'][0]['properties']['title'] == "Center Cafe"
+
+    # Filter by price level 0 and 1 (Center Cafe, Nearby Cafe)
+    response_0_1 = api_client.get(url, {'price_level': '0,1'})
+    assert len(response_0_1.json()['features']) == 2
+    titles = [f['properties']['title'] for f in response_0_1.json()['features']]
+    assert "Center Cafe" in titles
+    assert "Nearby Cafe" in titles
+
+
+@pytest.mark.django_db
+def test_place_filter_by_weather(api_client, setup_data):
+    url = reverse('place-list')
+    
+    # Under clear weather, should return all
+    response_clear = api_client.get(url, {'weather': 'clear'})
+    assert len(response_clear.json()['features']) == 3
+
+    # Under rain, should return only indoor cafes (Nearby Cafe, Far Cafe)
+    response_rain = api_client.get(url, {'weather': 'rain'})
+    assert len(response_rain.json()['features']) == 2
+    titles = [f['properties']['title'] for f in response_rain.json()['features']]
+    assert "Nearby Cafe" in titles
+    assert "Far Cafe" in titles
+    assert "Center Cafe" not in titles
+
+
+@pytest.mark.django_db
+def test_place_filter_by_current_time(api_client, setup_data):
+    url = reverse('place-list')
+    
+    # Monday at 11:00 AM (Center Cafe is open 10-18, others open at 12:00)
+    response_11am = api_client.get(url, {'current_time': '2026-05-18T11:00:00'})
+    features = response_11am.json()['features']
+    assert len(features) == 1
+    assert features[0]['properties']['title'] == "Center Cafe"
+
+    # Monday at 14:00 PM (all cafes are open)
+    response_2pm = api_client.get(url, {'current_time': '2026-05-18T14:00:00'})
+    assert len(response_2pm.json()['features']) == 3
+
+    # Monday at 22:00 PM (Center is closed, Nearby Cafe 12-03 is open, Far Cafe 12-23 is open)
+    response_10pm = api_client.get(url, {'current_time': '2026-05-18T22:00:00'})
+    assert len(response_10pm.json()['features']) == 2
+    titles = [f['properties']['title'] for f in response_10pm.json()['features']]
+    assert "Nearby Cafe" in titles
+    assert "Far Cafe" in titles
+
+    # Tuesday at 01:00 AM (which checks Monday's wrap-around 12:00 to 03:00)
+    # 2026-05-19 is Tuesday
+    response_1am_tue = api_client.get(url, {'current_time': '2026-05-19T01:00:00'})
+    assert len(response_1am_tue.json()['features']) == 1
+    assert response_1am_tue.json()['features'][0]['properties']['title'] == "Nearby Cafe"
+
+
+@pytest.mark.django_db
+def test_route_calculate_circular_loop(api_client, setup_data):
+    url = reverse('route-calculate')
+    payload = {
+        "is_loop": True,
+        "start_coords": [30.3158, 59.9390],
+        "distance": 3000
+    }
+    
+    response = api_client.post(url, payload, format='json')
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    
+    # Should contain route info
+    assert 'route' in data
+    assert 'geometry' in data['route']
+    assert data['route']['geometry']['type'] == 'LineString'
+    
+    # First and last coordinates should match the starting coords
+    coords = data['route']['geometry']['coordinates']
+    assert coords[0] == [30.3158, 59.9390]
+    assert coords[-1] == [30.3158, 59.9390]
+    
+    # Should return serialized places along the loop route
+    assert 'places' in data
+    assert len(data['places']) >= 1
+
 

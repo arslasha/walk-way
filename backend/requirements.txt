@@ -12,3 +12,7 @@ requests~=2.31.0
 # Testing
 pytest-django~=4.8.0
 pytest-factoryboy~=2.7.0
+
+# CORS
+django-cors-headers~=4.3.1
+

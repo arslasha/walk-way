@@ -5,6 +5,7 @@ from django.contrib.gis.geos import Point
 from django.db import transaction
 from django.utils.html import strip_tags
 from places.models import Place, Category, Tag
+from places.utils import parse_timetable, determine_is_indoor, determine_price_level
 
 class Command(BaseCommand):
     help = 'Parses places and categories from KudaGo API'
@@ -67,7 +68,7 @@ class Command(BaseCommand):
         base_url = 'https://kudago.com/public-api/v1.4/places/'
         params = {
             'location': city,
-            'fields': 'id,title,address,coords,categories,tags,description,body_text,images',
+            'fields': 'id,title,address,coords,categories,tags,description,body_text,images,timetable',
             'page_size': 100,
         }
 
@@ -151,6 +152,14 @@ class Command(BaseCommand):
         images = place_data.get('images', [])
         photo_urls = [img.get('image') for img in images if img.get('image')]
 
+        # Timetable and Heuristics for Time, Weather, and Budget Filters
+        timetable = place_data.get('timetable') or ''
+        opening_hours = parse_timetable(timetable)
+        
+        main_cat_slug = main_category.slug if main_category else ''
+        is_indoor = determine_is_indoor(main_cat_slug, kudago_tags)
+        price_level = determine_price_level(main_cat_slug, clean_desc)
+
         # Save to DB
         place, created = Place.objects.update_or_create(
             kudago_id=kudago_id,
@@ -162,6 +171,10 @@ class Command(BaseCommand):
                 'category': main_category,
                 'photos': photo_urls,
                 'is_active': True,
+                'opening_hours': opening_hours,
+                'opening_hours_text': timetable,
+                'price_level': price_level,
+                'is_indoor': is_indoor,
             }
         )
 

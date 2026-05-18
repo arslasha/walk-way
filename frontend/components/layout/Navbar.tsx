@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin, ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { MapPin, ChevronDown, User as UserIcon, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NAV_LINKS } from "@/constants/navigation";
 import { useActivePath } from "@/hooks/use-active-path";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { useAuthStore } from "@/store/authStore";
+import { toast } from "sonner";
 
 function NavLink({ href, label }: { href: string; label: string }) {
   const isActive = useActivePath(href);
@@ -26,6 +29,15 @@ function NavLink({ href, label }: { href: string; label: string }) {
 }
 
 export function Navbar() {
+  const router = useRouter();
+  const { isAuthenticated, user, logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    await logout();
+    toast.success("Вы вышли из системы");
+    router.push("/");
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-sm">
       <div className="ww-container flex h-[72px] items-center justify-between gap-8">
@@ -40,6 +52,9 @@ export function Navbar() {
           {NAV_LINKS.map((link) => (
             <NavLink key={link.href} {...link} />
           ))}
+          {isAuthenticated && (
+            <NavLink href="/profile" label="Профиль" />
+          )}
         </nav>
 
 
@@ -52,19 +67,50 @@ export function Navbar() {
           
           <ThemeToggle />
 
-          <Link
-            href="/auth/login"
-            className="rounded-full border border-border px-4 py-1.5 text-sm font-medium text-foreground transition-all hover:border-foreground/40 hover:bg-foreground/5"
-          >
-            Войти
-          </Link>
+          {isAuthenticated && user ? (
+            <div className="flex items-center gap-3">
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 rounded-full border border-border pl-2 pr-3 py-1 text-sm font-medium text-foreground hover:bg-foreground/5 transition-all"
+              >
+                {user.avatar ? (
+                  <img
+                    src={user.avatar.startsWith("http") ? user.avatar : `${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}${user.avatar}`}
+                    alt={user.nickname}
+                    className="h-6 w-6 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 text-accent">
+                    <UserIcon className="h-3.5 w-3.5" />
+                  </div>
+                )}
+                <span>{user.nickname}</span>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground hover:text-red-500 hover:border-red-500/30 hover:bg-red-500/5 transition-all"
+                title="Выйти"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link
+                href="/auth/login"
+                className="rounded-full border border-border px-4 py-1.5 text-sm font-medium text-foreground transition-all hover:border-foreground/40 hover:bg-foreground/5"
+              >
+                Войти
+              </Link>
 
-          <Link
-            href="/auth/register"
-            className="rounded-full bg-ww-ink px-4 py-1.5 text-sm font-semibold text-white transition-all hover:bg-ww-ink/80"
-          >
-            Зарегистрироваться
-          </Link>
+              <Link
+                href="/auth/register"
+                className="rounded-full bg-ww-ink px-4 py-1.5 text-sm font-semibold text-white transition-all hover:bg-ww-ink/80"
+              >
+                Зарегистрироваться
+              </Link>
+            </>
+          )}
         </div>
 
         <button className="p-2 text-muted-foreground hover:text-foreground md:hidden">

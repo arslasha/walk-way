@@ -302,6 +302,7 @@ def test_place_filter_by_current_time(api_client, setup_data):
 
 @pytest.mark.django_db
 def test_route_calculate_circular_loop(api_client, setup_data):
+    import unittest.mock
     url = reverse('route-calculate')
     payload = {
         "is_loop": True,
@@ -309,23 +310,51 @@ def test_route_calculate_circular_loop(api_client, setup_data):
         "distance": 3000
     }
     
-    response = api_client.post(url, payload, format='json')
-    assert response.status_code == status.HTTP_200_OK
-    data = response.json()
+    mock_ors_response = {
+        "features": [
+            {
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                        [30.3158, 59.9390],
+                        [30.3230, 59.9390],
+                        [30.3428, 59.9390],
+                        [30.3158, 59.9390]
+                    ]
+                },
+                "properties": {
+                    "summary": {
+                        "distance": 3200.0,
+                        "duration": 2200.0
+                    }
+                }
+            }
+        ]
+    }
     
-    # Should contain route info
-    assert 'route' in data
-    assert 'geometry' in data['route']
-    assert data['route']['geometry']['type'] == 'LineString'
-    
-    # First and last coordinates should match the starting coords
-    coords = data['route']['geometry']['coordinates']
-    assert coords[0] == [30.3158, 59.9390]
-    assert coords[-1] == [30.3158, 59.9390]
-    
-    # Should return serialized places along the loop route
-    assert 'places' in data
-    assert len(data['places']) >= 1
+    with unittest.mock.patch('requests.post') as mock_post:
+        mock_response = unittest.mock.Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = mock_ors_response
+        mock_post.return_value = mock_response
+        
+        response = api_client.post(url, payload, format='json')
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        
+        # Should contain route info
+        assert 'route' in data
+        assert 'geometry' in data['route']
+        assert data['route']['geometry']['type'] == 'LineString'
+        
+        # First and last coordinates should match the starting coords
+        coords = data['route']['geometry']['coordinates']
+        assert coords[0] == [30.3158, 59.9390]
+        assert coords[-1] == [30.3158, 59.9390]
+        
+        # Should return serialized places along the loop route
+        assert 'places' in data
+        assert len(data['places']) >= 1
 
 
 @pytest.mark.django_db

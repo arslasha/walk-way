@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'places',
     'users.apps.UsersConfig',
+    'collections_app.apps.CollectionsConfig',
 ]
 
 MIDDLEWARE = [

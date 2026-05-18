@@ -1,6 +1,18 @@
 import { PlaceFeatureCollection, Category, Tag, PlaceFilters } from "@/types/place";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const getApiBaseUrl = () => {
+  if (typeof window === "undefined") {
+    return process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
+  }
+  // In the browser, check if environment URL is a valid external URL
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (envUrl && !envUrl.includes("//web:") && !envUrl.includes("//web/")) {
+    return envUrl;
+  }
+  return "http://127.0.0.1:8000/api/v1";
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 export async function getPlaces(filters?: PlaceFilters): Promise<PlaceFeatureCollection> {
   const url = new URL(`${API_BASE_URL}/places/`);

@@ -164,13 +164,26 @@ def test_route_calculate_by_places(api_client, setup_data):
 @pytest.mark.django_db
 def test_route_calculate_invalid_payload(api_client):
     url = reverse('route-calculate')
-    # coordinates less than 2
-    payload = {
-        "coordinates": [
-            [30.3158, 59.9390]
-        ]
-    }
-    response = api_client.post(url, payload, format='json')
+    
+    # 1. Less than 2 coordinates
+    payload_less_points = {"coordinates": [[30.3158, 59.9390]]}
+    response = api_client.post(url, payload_less_points, format='json')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    # 2. Out of bounds coordinates (lat > 90)
+    payload_out_bounds = {"coordinates": [[30.3158, 95.9390], [30.3230, 59.9390]]}
+    response = api_client.post(url, payload_out_bounds, format='json')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    # 3. Negative coordinates are mathematically valid (Southern/Western hemisphere)
+    payload_negative = {"coordinates": [[-30.3158, -59.9390], [-30.3230, -59.9390]]}
+    response = api_client.post(url, payload_negative, format='json')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()['geometry']['type'] == 'LineString'
+
+    # 4. Malformed/non-numeric values
+    payload_malformed = {"coordinates": [[30.3158, "invalid"], [30.3230, 59.9390]]}
+    response = api_client.post(url, payload_malformed, format='json')
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
@@ -313,5 +326,110 @@ def test_route_calculate_circular_loop(api_client, setup_data):
     # Should return serialized places along the loop route
     assert 'places' in data
     assert len(data['places']) >= 1
+
+
+@pytest.mark.django_db
+def test_route_calculate_ors_success(api_client, settings):
+    import requests
+    import unittest.mock
+    settings.ORS_API_KEY = "valid_key"
+    url = reverse('route-calculate')
+    payload = {
+        "coordinates": [
+            [30.3158, 59.9390],
+            [30.3230, 59.9390]
+        ]
+    }
+    
+    mock_ors_response = {
+        "features": [
+            {
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                        [30.3158, 59.9390],
+                        [30.3230, 59.9390]
+                    ]
+                },
+                "properties": {
+                    "summary": {
+                        "distance": 850.5,
+                        "duration": 607.0
+                    }
+                }
+            }
+        ]
+    }
+    
+    with unittest.mock.patch('requests.post') as mock_post:
+        mock_response = unittest.mock.Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = mock_ors_response
+        mock_post.return_value = mock_response
+        
+        response = api_client.post(url, payload, format='json')
+        
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data['distance'] == 850.5
+        assert data['duration'] == 607.0
+        assert data['geometry']['coordinates'] == [[30.3158, 59.9390], [30.3230, 59.9390]]
+        mock_post.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_route_calculate_ors_failure_fallback(api_client, settings):
+    import requests
+    import unittest.mock
+    settings.ORS_API_KEY = "valid_key"
+    url = reverse('route-calculate')
+    payload = {
+        "coordinates": [
+            [30.3158, 59.9390],
+            [30.3230, 59.9390]
+        ]
+    }
+    
+    with unittest.mock.patch('requests.post', side_effect=requests.RequestException("Rate limit exceeded")) as mock_post:
+        response = api_client.post(url, payload, format='json')
+        
+        # Should gracefully fall back to straight line and return 200 OK
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data['distance'] > 0
+        assert data['duration'] > 0
+        assert data['geometry']['type'] == 'LineString'
+        mock_post.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_places_along_route_invalid_buffer(api_client, setup_data):
+    url = reverse('place-along-route')
+    
+    payload_negative = {
+        "route": {
+            "type": "LineString",
+            "coordinates": [
+                [30.3158, 59.9390],
+                [30.3230, 59.9390]
+            ]
+        },
+        "buffer": -50
+    }
+    response = api_client.post(url, payload_negative, format='json')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    payload_invalid = {
+        "route": {
+            "type": "LineString",
+            "coordinates": [
+                [30.3158, 59.9390],
+                [30.3230, 59.9390]
+            ]
+        },
+        "buffer": "invalid"
+    }
+    response = api_client.post(url, payload_invalid, format='json')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 

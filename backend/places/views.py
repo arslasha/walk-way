@@ -25,6 +25,13 @@ class PlaceViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({'error': 'Route data is required'}, status=status.HTTP_400_BAD_REQUEST)
         
         buffer_radius = request.data.get('buffer', 150)
+        try:
+            buffer_radius = float(buffer_radius)
+            if buffer_radius <= 0:
+                return Response({'error': 'Buffer radius must be greater than zero.'}, status=status.HTTP_400_BAD_REQUEST)
+        except (ValueError, TypeError):
+            return Response({'error': 'Buffer radius must be a valid number.'}, status=status.HTTP_400_BAD_REQUEST)
+
         exclude_ids = request.data.get('exclude_ids', [])
 
         try:
@@ -66,7 +73,11 @@ class RouteCalculateView(APIView):
                 
             try:
                 start_lon, start_lat = float(start_coords[0]), float(start_coords[1])
+                if not (-180 <= start_lon <= 180) or not (-90 <= start_lat <= 90):
+                    return Response({'error': 'Coordinates out of bounds.'}, status=status.HTTP_400_BAD_REQUEST)
                 distance = float(request.data.get('distance', 3000))
+                if distance <= 0:
+                    return Response({'error': 'Distance must be positive.'}, status=status.HTTP_400_BAD_REQUEST)
             except (ValueError, TypeError):
                 return Response({'error': 'Invalid format for start_coords or distance.'}, status=status.HTTP_400_BAD_REQUEST)
                 
@@ -106,10 +117,22 @@ class RouteCalculateView(APIView):
                 ordered_places = [place_dict[pk] for pk in places if pk in place_dict]
                 coordinates = [[p.location.x, p.location.y] for p in ordered_places]
 
-            if len(coordinates) < 2:
+            if not isinstance(coordinates, list) or len(coordinates) < 2:
                 return Response({'error': 'At least 2 points are required to calculate a route.'}, status=status.HTTP_400_BAD_REQUEST)
-                
-            route_info = ORSClient.get_route(coordinates)
+            
+            validated_coords = []
+            for coord in coordinates:
+                if not isinstance(coord, list) or len(coord) < 2:
+                    return Response({'error': 'Each coordinate must be a [lon, lat] list.'}, status=status.HTTP_400_BAD_REQUEST)
+                try:
+                    lon, lat = float(coord[0]), float(coord[1])
+                    if not (-180 <= lon <= 180) or not (-90 <= lat <= 90):
+                        return Response({'error': 'Coordinates out of bounds.'}, status=status.HTTP_400_BAD_REQUEST)
+                    validated_coords.append([lon, lat])
+                except (ValueError, TypeError):
+                    return Response({'error': 'Coordinates must contain valid float values.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            route_info = ORSClient.get_route(validated_coords)
             if not route_info:
                 return Response({'error': 'Failed to calculate route.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 

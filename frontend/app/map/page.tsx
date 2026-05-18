@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import Map, { Marker, NavigationControl, MapRef } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import maplibregl from "maplibre-gl";
 import { useRouteStore } from "@/store/routeStore";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
+import { RouteBottomSheet } from "@/components/features/route/RouteBottomSheet";
+import { Navbar } from "@/components/layout/Navbar";
+import { PlaceFeature } from "@/types/place";
 
 const MOSCOW_CENTER = {
   longitude: 37.6173,
@@ -22,6 +23,7 @@ export default function MapPage() {
   const [mounted, setMounted] = useState(false);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [hasFitBounds, setHasFitBounds] = useState(false);
+  const [activePlaceId, setActivePlaceId] = useState<number | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -42,8 +44,14 @@ export default function MapPage() {
     });
 
     if (!bounds.isEmpty()) {
+      const isDesktop = window.innerWidth >= 768;
       mapRef.current.fitBounds(bounds, {
-        padding: 50,
+        padding: {
+          top: 80,
+          bottom: 80,
+          left: isDesktop ? 420 : 60, // Shift center to the right to avoid overlapping with desktop sidebar
+          right: 60,
+        },
         maxZoom: 16,
         duration: 1000,
       });
@@ -70,17 +78,18 @@ export default function MapPage() {
       ? "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
       : "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 
+  const handleSelectPlace = (place: PlaceFeature) => {
+    setActivePlaceId(place.id);
+    mapRef.current?.flyTo({
+      center: [place.geometry.coordinates[0], place.geometry.coordinates[1]],
+      zoom: 15,
+      duration: 1000,
+    });
+  };
+
   return (
     <div className="flex flex-col h-screen w-full bg-background relative overflow-hidden">
-      {/* Absolute Header Overlay */}
-      <div className="absolute top-0 left-0 w-full p-4 z-30 flex items-center justify-between pointer-events-none">
-        <Link
-          href="/explore"
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-background/80 backdrop-blur-md shadow-md pointer-events-auto hover:bg-background transition-colors"
-        >
-          <ArrowLeft className="h-6 w-6 text-foreground" />
-        </Link>
-      </div>
+      <Navbar />
 
       {/* Preloader */}
       {(!mounted || !isMapLoaded) && (
@@ -100,6 +109,7 @@ export default function MapPage() {
           mapStyle={mapStyle}
           attributionControl={false}
           onLoad={() => setIsMapLoaded(true)}
+          onClick={() => setActivePlaceId(null)}
         >
           <NavigationControl position="bottom-right" />
 
@@ -111,14 +121,19 @@ export default function MapPage() {
               latitude={place.geometry.coordinates[1]}
               anchor="bottom"
             >
-              <div className="relative group cursor-pointer">
+              <div 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSelectPlace(place);
+                }}
+                className="relative group cursor-pointer"
+              >
                 <div
                   className={cn(
-                    "flex items-center justify-center w-8 h-8 rounded-full",
-                    "bg-accent text-white font-bold text-sm shadow-lg",
-                    "border-2 border-background",
-                    "transform transition-transform group-hover:scale-110",
-                    "z-10 relative"
+                    "flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm shadow-lg border-2 border-background z-10 relative transition-all duration-300",
+                    activePlaceId === place.id
+                      ? "bg-accent text-white scale-125 ring-4 ring-accent/30 border-white"
+                      : "bg-accent text-white group-hover:scale-110"
                   )}
                 >
                   {index + 1}
@@ -126,9 +141,16 @@ export default function MapPage() {
                 {/* Optional marker pointer/pin base */}
                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-accent rotate-45 z-0" />
                 
-                {/* Tooltip on hover */}
-                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
-                  <div className="bg-surface text-text-primary text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg border border-border">
+                {/* Tooltip on hover or active */}
+                <div 
+                  className={cn(
+                    "absolute bottom-full mb-2 left-1/2 -translate-x-1/2 transition-all duration-300 pointer-events-none whitespace-nowrap z-20",
+                    activePlaceId === place.id
+                      ? "opacity-100 scale-100"
+                      : "opacity-0 group-hover:opacity-100 scale-95"
+                  )}
+                >
+                  <div className="bg-surface text-text-primary text-xs font-bold px-3 py-1.5 rounded-full shadow-lg border border-border">
                     {place.properties.title}
                   </div>
                 </div>
@@ -137,6 +159,15 @@ export default function MapPage() {
           ))}
         </Map>
       </div>
+
+      {/* Floating Bottom Sheet (Mobile) & Side Panel (Desktop) */}
+      {isMapLoaded && (
+        <RouteBottomSheet 
+          onSelectPlace={handleSelectPlace}
+          activePlaceId={activePlaceId}
+        />
+      )}
     </div>
   );
 }
+

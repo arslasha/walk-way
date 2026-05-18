@@ -21,5 +21,6 @@ class PlaceSerializer(GeoFeatureModelSerializer):
         geo_field = "location"
         fields = [
             'id', 'title', 'description', 'address', 'category', 'tags',
-            'is_active', 'is_analyzed', 'photos', 'icebreakers'
+            'is_active', 'is_analyzed', 'photos', 'icebreakers',
+            'opening_hours', 'opening_hours_text', 'price_level', 'is_indoor'
         ]

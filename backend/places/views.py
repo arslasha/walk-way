@@ -54,29 +54,76 @@ class PlaceViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RouteCalculateView(APIView):
     def post(self, request):
-        places = request.data.get('places', [])
-        coordinates = request.data.get('coordinates', [])
+        is_loop = request.data.get('is_loop', False)
         
-        if places:
-            place_dict = {p.id: p for p in Place.objects.filter(id__in=places)}
-            ordered_places = [place_dict[pk] for pk in places if pk in place_dict]
-            coordinates = [[p.location.x, p.location.y] for p in ordered_places]
+        if is_loop:
+            start_coords = request.data.get('start_coords') or request.data.get('coordinates', [])
+            if not start_coords or len(start_coords) < 2:
+                return Response({'error': 'start_coords [lon, lat] is required for loop routes.'}, status=status.HTTP_400_BAD_REQUEST)
+                
+            if isinstance(start_coords[0], list):
+                start_coords = start_coords[0]
+                
+            try:
+                start_lon, start_lat = float(start_coords[0]), float(start_coords[1])
+                distance = float(request.data.get('distance', 3000))
+            except (ValueError, TypeError):
+                return Response({'error': 'Invalid format for start_coords or distance.'}, status=status.HTTP_400_BAD_REQUEST)
+                
+            vibe_slugs = request.data.get('vibes', [])
+            category_slug = request.data.get('category')
+            
+            selected_items = ORSClient.generate_loop_route_points(
+                start_lon, start_lat, distance, vibe_slugs, category_slug
+            )
+            
+            if not selected_items:
+                return Response({'error': 'No suitable places found to build a circular route.'}, status=status.HTTP_404_NOT_FOUND)
+                
+            coords = [[start_lon, start_lat]]
+            for item in selected_items:
+                coords.append(item['coords'])
+            coords.append([start_lon, start_lat])
+            
+            route_info = ORSClient.get_route(coords)
+            if not route_info:
+                return Response({'error': 'Failed to calculate circular route.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
+            places_list = [item['place'] for item in selected_items]
+            serialized_places = PlaceSerializer(places_list, many=True, context={'request': request}).data
+            
+            return Response({
+                'route': route_info,
+                'places': serialized_places
+            })
+            
+        else:
+            places = request.data.get('places', [])
+            coordinates = request.data.get('coordinates', [])
+            
+            if places:
+                place_dict = {p.id: p for p in Place.objects.filter(id__in=places)}
+                ordered_places = [place_dict[pk] for pk in places if pk in place_dict]
+                coordinates = [[p.location.x, p.location.y] for p in ordered_places]
 
-        if len(coordinates) < 2:
-            return Response({'error': 'At least 2 points are required to calculate a route.'}, status=status.HTTP_400_BAD_REQUEST)
-            
-        route_info = ORSClient.get_route(coordinates)
-        if not route_info:
-            return Response({'error': 'Failed to calculate route.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
-        return Response(route_info)
+            if len(coordinates) < 2:
+                return Response({'error': 'At least 2 points are required to calculate a route.'}, status=status.HTTP_400_BAD_REQUEST)
+                
+            route_info = ORSClient.get_route(coordinates)
+            if not route_info:
+                return Response({'error': 'Failed to calculate route.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
+            return Response(route_info)
+
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    pagination_class = None
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
     filter_backends = [filters.DjangoFilterBackend]
     filterset_fields = ['is_vibe']

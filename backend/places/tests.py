@@ -118,3 +118,100 @@ def test_place_spatial_filter(api_client, setup_data):
     response_large = api_client.get(url, {'lat': lat, 'lon': lon, 'radius': 2000})
     features = response_large.json()['features']
     assert len(features) == 3
+
+
+@pytest.mark.django_db
+def test_route_calculate_by_coordinates(api_client):
+    url = reverse('route-calculate')
+    payload = {
+        "coordinates": [
+            [30.3158, 59.9390],
+            [30.3230, 59.9390]
+        ]
+    }
+    response = api_client.post(url, payload, format='json')
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert 'geometry' in data
+    assert data['geometry']['type'] == 'LineString'
+    assert 'distance' in data
+    assert 'duration' in data
+
+
+@pytest.mark.django_db
+def test_route_calculate_by_places(api_client, setup_data):
+    url = reverse('route-calculate')
+    payload = {
+        "places": [setup_data['place1'].id, setup_data['place2'].id]
+    }
+    response = api_client.post(url, payload, format='json')
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert 'geometry' in data
+    assert data['geometry']['type'] == 'LineString'
+    assert data['distance'] > 0
+
+
+@pytest.mark.django_db
+def test_route_calculate_invalid_payload(api_client):
+    url = reverse('route-calculate')
+    # coordinates less than 2
+    payload = {
+        "coordinates": [
+            [30.3158, 59.9390]
+        ]
+    }
+    response = api_client.post(url, payload, format='json')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_places_along_route(api_client, setup_data):
+    url = reverse('place-along-route')
+    
+    # Define route directly between place1 and place2
+    payload = {
+        "route": {
+            "type": "LineString",
+            "coordinates": [
+                [30.3158, 59.9390],
+                [30.3230, 59.9390]
+            ]
+        },
+        "buffer": 150 # meters
+    }
+    
+    response = api_client.post(url, payload, format='json')
+    assert response.status_code == status.HTTP_200_OK
+    
+    # Should return Center Cafe and Nearby Cafe which are right on/near this path
+    features = response.json()['features']
+    assert len(features) == 2
+    titles = [f['properties']['title'] for f in features]
+    assert "Center Cafe" in titles
+    assert "Nearby Cafe" in titles
+    assert "Far Cafe" not in titles
+
+
+@pytest.mark.django_db
+def test_places_along_route_exclude_ids(api_client, setup_data):
+    url = reverse('place-along-route')
+    
+    payload = {
+        "route": {
+            "type": "LineString",
+            "coordinates": [
+                [30.3158, 59.9390],
+                [30.3230, 59.9390]
+            ]
+        },
+        "buffer": 150,
+        "exclude_ids": [setup_data['place1'].id]
+    }
+    
+    response = api_client.post(url, payload, format='json')
+    assert response.status_code == status.HTTP_200_OK
+    features = response.json()['features']
+    assert len(features) == 1
+    assert features[0]['properties']['title'] == "Nearby Cafe"
+

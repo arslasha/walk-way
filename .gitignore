@@ -1,6 +1,5 @@
 # Agent and local settings
 .env
-.env.example
 
 # Python
 __pycache__/

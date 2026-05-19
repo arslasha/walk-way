@@ -4,6 +4,7 @@ import type { PlaceFeature } from "@/types/place";
 import { useRouteStore } from "@/store/routeStore";
 import { Plus, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SaveToCollectionButton } from "@/components/collections/SaveToCollectionButton";
 
 interface PlaceCardProps {
   place: PlaceFeature;
@@ -46,8 +47,8 @@ export function PlaceCard({ place }: PlaceCardProps) {
       <div className="p-4 flex flex-col flex-1">
         <h3 className="text-[18px] font-bold text-foreground line-clamp-2">{p.title}</h3>
         <p className="mt-1 text-caption text-muted-foreground line-clamp-2">{p.address || "Адрес не указан"}</p>
-        
-        <div className="mb-4 mt-3 flex flex-wrap gap-1.5 mt-auto">
+
+        <div className="mt-3 flex flex-wrap gap-1.5">
           {vibes.slice(0, 3).map((vibe) => (
             <span key={vibe} className="rounded-full bg-secondary px-2.5 py-1 text-[12px] font-medium text-accent">
               {vibe}
@@ -58,32 +59,36 @@ export function PlaceCard({ place }: PlaceCardProps) {
           )}
         </div>
 
-        <div className="flex items-center justify-between mt-auto pt-2">
+        <div className="flex items-center justify-between mt-auto pt-3 gap-2">
           <span className="text-caption text-muted-foreground">~ 1 ч.</span>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              toggleRoute();
-            }}
-            className={cn(
-              "flex h-8 items-center justify-center gap-1.5 rounded-full px-3 text-[13px] font-bold transition-colors",
-              isInRoute 
-                ? "bg-secondary text-foreground hover:bg-secondary/80" 
-                : "bg-primary text-primary-foreground hover:bg-primary/90"
-            )}
-          >
-            {isInRoute ? (
-              <>
-                <Check className="h-3.5 w-3.5" />
-                <span>В маршруте</span>
-              </>
-            ) : (
-              <>
-                <Plus className="h-3.5 w-3.5" />
-                <span>В маршрут</span>
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Bookmark — save to personal collection */}
+            <SaveToCollectionButton placeId={place.id as number} />
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                toggleRoute();
+              }}
+              className={cn(
+                "flex h-8 items-center justify-center gap-1.5 rounded-full px-3 text-[13px] font-bold transition-colors",
+                isInRoute
+                  ? "bg-secondary text-foreground hover:bg-secondary/80"
+                  : "bg-primary text-primary-foreground hover:bg-primary/90"
+              )}
+            >
+              {isInRoute ? (
+                <>
+                  <Check className="h-3.5 w-3.5" />
+                  <span>В маршруте</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>В маршрут</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

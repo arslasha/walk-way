@@ -3,21 +3,27 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
+import { useCollectionStore } from "@/store/collectionStore";
 import { Navbar } from "@/components/layout/Navbar";
-import { 
-  User as UserIcon, 
-  Shield, 
-  ShieldCheck, 
-  Folder, 
-  Users, 
-  Camera, 
-  Edit3, 
-  Copy, 
-  Check, 
-  Loader2, 
+import {
+  User as UserIcon,
+  Shield,
+  ShieldCheck,
+  Folder,
+  Users,
+  Camera,
+  Edit3,
+  Copy,
+  Check,
+  Loader2,
   X,
   Lock,
-  ChevronRight
+  Globe,
+  Plus,
+  Trash2,
+  ChevronRight,
+  MapPin,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -36,8 +42,25 @@ export default function ProfilePage() {
     qrCodeData
   } = useAuthStore();
 
+  // Collections store
+  const {
+    collections,
+    isLoading: collectionsLoading,
+    fetchCollections,
+    createCollection,
+    deleteCollection,
+    removePlace: removePlaceFromCollection,
+  } = useCollectionStore();
+
   // Tabs state
   const [activeTab, setActiveTab] = useState<"folders" | "friends">("folders");
+
+  // New collection form state
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [newFolderDesc, setNewFolderDesc] = useState("");
+  const [newFolderPublic, setNewFolderPublic] = useState(true);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   // Edit profile state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -65,6 +88,13 @@ export default function ProfilePage() {
       router.push("/auth/login");
     }
   }, [isAuthenticated, isLoading, router]);
+
+  // Fetch collections when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchCollections();
+    }
+  }, [isAuthenticated, fetchCollections]);
 
   // Sync edit profile form
   useEffect(() => {
@@ -331,26 +361,162 @@ export default function ProfilePage() {
               </div>
 
               {/* Tab Contents */}
-              <div className="flex-1 flex flex-col justify-center items-center">
+              <div className="flex-1">
                 {activeTab === "folders" ? (
-                  <div className="text-center max-w-sm py-12">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 text-accent mb-4">
-                      <Folder className="h-7 w-7" />
-                    </div>
-                    <h3 className="font-heading text-lg font-bold text-foreground lowercase">здесь пока пусто</h3>
-                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                      Создавайте персональные подборки мест для свиданий, прогулок в одиночку или шумных компаний.
-                    </p>
-                    <button 
-                      onClick={() => toast.info("Функционал папок будет доступен в следующих фазах разработки")}
-                      className="mt-6 inline-flex items-center gap-1.5 rounded-full bg-accent px-5 py-2 text-xs font-bold text-white transition-all hover:bg-accent-hover"
-                    >
-                      создать папку
-                      <ChevronRight className="h-3.5 w-3.5" />
-                    </button>
+                  <div className="space-y-4">
+                    {/* Create new collection form */}
+                    {isCreatingFolder ? (
+                      <form
+                        onSubmit={async (e) => {
+                          e.preventDefault();
+                          if (!newFolderName.trim()) return;
+                          const coll = await createCollection(newFolderName.trim(), newFolderDesc, newFolderPublic);
+                          if (coll) {
+                            toast.success(`Папка «${coll.name}» создана`);
+                            setIsCreatingFolder(false);
+                            setNewFolderName("");
+                            setNewFolderDesc("");
+                          } else {
+                            toast.error("Не удалось создать папку");
+                          }
+                        }}
+                        className="rounded-[28px] border border-accent/40 bg-accent/5 p-5 space-y-3"
+                      >
+                        <p className="text-xs font-bold tracking-wider text-accent uppercase">новая папка</p>
+                        <input
+                          type="text"
+                          value={newFolderName}
+                          onChange={(e) => setNewFolderName(e.target.value)}
+                          placeholder="Название папки"
+                          autoFocus
+                          required
+                          className="w-full h-10 px-4 rounded-full border border-border bg-surface text-foreground text-sm focus:border-accent focus:outline-none"
+                        />
+                        <input
+                          type="text"
+                          value={newFolderDesc}
+                          onChange={(e) => setNewFolderDesc(e.target.value)}
+                          placeholder="Описание (необязательно)"
+                          className="w-full h-10 px-4 rounded-full border border-border bg-surface text-foreground text-sm focus:border-accent focus:outline-none"
+                        />
+                        <div className="flex items-center gap-3">
+                          <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={newFolderPublic}
+                              onChange={(e) => setNewFolderPublic(e.target.checked)}
+                              className="accent-accent"
+                            />
+                            Публичная папка
+                          </label>
+                        </div>
+                        <div className="flex gap-3">
+                          <button type="submit" disabled={collectionsLoading} className="flex-1 h-9 rounded-full bg-accent text-white text-xs font-bold hover:bg-accent-hover transition-all disabled:opacity-50">
+                            {collectionsLoading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "создать"}
+                          </button>
+                          <button type="button" onClick={() => { setIsCreatingFolder(false); setNewFolderName(""); setNewFolderDesc(""); }} className="flex-1 h-9 rounded-full border border-border text-foreground text-xs font-bold hover:bg-surface-raised transition-all">
+                            отмена
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <button
+                        onClick={() => setIsCreatingFolder(true)}
+                        className="flex w-full items-center gap-2 rounded-[28px] border border-dashed border-border px-5 py-4 text-sm font-semibold text-muted-foreground hover:border-accent hover:text-accent transition-all"
+                      >
+                        <Plus className="h-4 w-4" />
+                        создать новую папку
+                      </button>
+                    )}
+
+                    {/* Collections grid */}
+                    {collectionsLoading && collections.length === 0 ? (
+                      <div className="flex justify-center py-8"><Loader2 className="h-7 w-7 animate-spin text-accent" /></div>
+                    ) : collections.length === 0 ? (
+                      <div className="text-center py-10">
+                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 text-accent mb-4">
+                          <Folder className="h-7 w-7" />
+                        </div>
+                        <h3 className="font-heading text-lg font-bold text-foreground lowercase">папок пока нет</h3>
+                        <p className="mt-2 text-sm text-muted-foreground">Создайте первую папку, чтобы сохранять любимые места</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {collections.map((c) => (
+                          <div key={c.id} className="rounded-[28px] border border-border bg-surface-raised p-5">
+                            <div className="flex items-start justify-between gap-3 mb-3">
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
+                                  <Folder className="h-4 w-4" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-bold text-foreground text-sm truncate">{c.name}</p>
+                                    {c.is_public ? (
+                                      <span className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
+                                        <Globe className="h-2.5 w-2.5" />публичная
+                                      </span>
+                                    ) : (
+                                      <span className="flex items-center gap-1 rounded-full bg-surface px-2 py-0.5 text-[10px] font-bold text-muted-foreground shrink-0">
+                                        <Lock className="h-2.5 w-2.5" />приватная
+                                      </span>
+                                    )}
+                                  </div>
+                                  {c.description && <p className="text-xs text-muted-foreground mt-0.5 truncate">{c.description}</p>}
+                                  <p className="text-xs text-muted-foreground mt-0.5">{c.places_count} {c.places_count === 1 ? "место" : c.places_count >= 2 && c.places_count <= 4 ? "места" : "мест"}</p>
+                                </div>
+                              </div>
+                              {deletingId === c.id ? (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground">Удалить?</span>
+                                  <button
+                                    onClick={async () => {
+                                      const ok = await deleteCollection(c.id);
+                                      if (ok) toast.success("Папка удалена");
+                                      else toast.error("Не удалось удалить");
+                                      setDeletingId(null);
+                                    }}
+                                    className="text-xs font-bold text-red-500 hover:text-red-600"
+                                  >да</button>
+                                  <button onClick={() => setDeletingId(null)} className="text-xs font-bold text-muted-foreground hover:text-foreground">нет</button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => setDeletingId(c.id)}
+                                  className="p-1.5 rounded-full text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors flex-shrink-0"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                            </div>
+
+                            {/* Places inside collection */}
+                            {c.places && c.places.length > 0 && (
+                              <div className="space-y-1.5 mt-3 border-t border-border pt-3">
+                                {c.places.map((p) => (
+                                  <div key={p.id} className="flex items-center gap-2 rounded-full bg-surface px-3 py-1.5 text-xs">
+                                    <MapPin className="h-3 w-3 text-accent flex-shrink-0" />
+                                    <span className="flex-1 truncate text-foreground font-medium">{p.title}</span>
+                                    <button
+                                      onClick={async () => {
+                                        const ok = await removePlaceFromCollection(c.id, p.id);
+                                        if (ok) toast.success("Место удалено из папки");
+                                      }}
+                                      className="text-muted-foreground hover:text-red-500 transition-colors flex-shrink-0"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  <div className="text-center max-w-sm py-12">
+                  <div className="text-center max-w-sm py-12 mx-auto">
                     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 text-accent mb-4">
                       <Users className="h-7 w-7" />
                     </div>
@@ -358,7 +524,7 @@ export default function ProfilePage() {
                     <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
                       Делитесь своими маршрутами, отправляйте подборки и планируйте совместные выходные.
                     </p>
-                    <button 
+                    <button
                       onClick={() => toast.info("Функционал друзей будет доступен в следующих фазах разработки")}
                       className="mt-6 inline-flex items-center gap-1.5 rounded-full bg-accent px-5 py-2 text-xs font-bold text-white transition-all hover:bg-accent-hover"
                     >

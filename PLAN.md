@@ -68,7 +68,7 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 ### Current Tasks
 - [x] **Task 015:** JWT Authentication, Registration & Optional 2FA (Backend).
 - [x] **Task 016:** Auth Forms, User Dashboard & Profile Editing UI (Frontend).
-- [ ] **Task 017:** Personal Folders & Place Collections (Backend & Frontend). ← IN PROGRESS
+- [x] **Task 017:** Personal Folders & Place Collections (Backend & Frontend).
 - [ ] **Task 018:** Social Graph, User Search & Friend Profiles (Backend & Frontend).
 - [ ] **Task 019:** QA: Security, Accounts, Collections & Social API Auto-tests.
 

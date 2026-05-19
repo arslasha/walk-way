@@ -206,6 +206,19 @@ All buttons: `border-radius: 10px`, `padding: 10px 20px`, `font-weight: 600`, `f
 - Focus: `border-color: --accent`, `outline: none`
 - Placeholder: `color: --text-secondary`
 
+### 7.7 Personal Collections (Folders)
+
+**SaveToCollectionButton:**
+- **Trigger:** Bookmark icon button (`h-9 w-9, rounded-full, border`).
+- **Saved State:** Filled accent bookmark (`text-accent bg-accent/10 border-accent`).
+- **Unsaved State:** Outline bookmark (`text-muted-foreground border-border bg-surface/80 hover:text-accent hover:border-accent/50`).
+- **Dropdown Menu:** Translucent blurred panel (`bg-surface border border-border shadow-2xl rounded-[20px] w-64 p-4`). Supports searching/selecting existing folders with checkmarks, custom public/private icons, and inline folder creation form.
+
+**Profile Folders Dashboard:**
+- **Tab Panel:** Integrates into `/profile` tab navigation.
+- **Grid Layout:** 2-column or 3-column asymmetric layout showing personal folders.
+- **Folder Card:** High-contrast raised surface (`bg-surface-raised, border border-border, rounded-card-sm, padding: 20px`). Includes folder name, description, place counter, public/private state toggle, list of saved places with map pins, and an inline delete confirmation flow.
+
 ---
 
 ## 8. Layout Grid
@@ -302,6 +315,7 @@ All buttons: `border-radius: 10px`, `padding: 10px 20px`, `font-weight: 600`, `f
 | 2026-05-18 | **Theme Integration & Interactive Map.** Added `next-themes` support, custom dynamic map styling (light/dark Matter), premium markers, and pulse preloader. | agent |
 | 2026-05-18 | **Map Bottom Sheet & Interactive UX.** Added `vaul` responsive bottom sheet with custom metrics, quick-add recommendations, and map-marker centering/highlighting. | agent |
 | 2026-05-18 | **Smart POIs & Route Path Rendering.** Added interactive map polyline paths with glowing effects, along-route "Smart POIs" dots, and interactive "Add to route" click popups. | agent |
+| 2026-05-19 | **Personal Folders & Place Collections.** Integrated `SaveToCollectionButton` on cards, built `/profile` folders tab dashboard with folder CRUD and item removal. | agent |
 
 
 ---

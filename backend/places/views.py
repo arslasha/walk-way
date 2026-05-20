@@ -111,11 +111,22 @@ class RouteCalculateView(APIView):
         else:
             places = request.data.get('places', [])
             coordinates = request.data.get('coordinates', [])
+            print("DEBUG RouteCalculateView - places input:", places)
+            print("DEBUG RouteCalculateView - coordinates input:", coordinates)
             
             if places:
+                try:
+                    places = [int(pk) for pk in places]
+                except (ValueError, TypeError) as e:
+                    print("DEBUG casting error:", e)
+                    return Response({'error': 'Invalid place IDs provided.'}, status=status.HTTP_400_BAD_REQUEST)
+                print("DEBUG places cast to int:", places)
                 place_dict = {p.id: p for p in Place.objects.filter(id__in=places)}
+                print("DEBUG place_dict keys:", list(place_dict.keys()))
                 ordered_places = [place_dict[pk] for pk in places if pk in place_dict]
+                print("DEBUG ordered_places length:", len(ordered_places))
                 coordinates = [[p.location.x, p.location.y] for p in ordered_places]
+                print("DEBUG coordinates output:", coordinates)
 
             if not isinstance(coordinates, list) or len(coordinates) < 2:
                 return Response({'error': 'At least 2 points are required to calculate a route.'}, status=status.HTTP_400_BAD_REQUEST)

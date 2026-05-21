@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { PlaceFeature } from "@/types/place";
 import { PlaceCard } from "./PlaceCard";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Loader } from "@/components/ui/Loader";
 import { useRouteStore } from "@/store/routeStore";
 
 interface ExploreFeedProps {
@@ -37,23 +38,19 @@ export function ExploreFeed({ initialPlaces }: ExploreFeedProps) {
               Интересные места по пути вашего прогулочного маршрута.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {isFetchingAlongRoute ? (
-              Array.from({ length: 3 }).map((_, idx) => (
-                <div 
-                  key={idx} 
-                  className="h-[320px] rounded-[40px] bg-secondary/30 animate-pulse border border-border/50 flex flex-col p-6 justify-end space-y-3"
-                >
-                  <div className="h-6 bg-secondary/50 rounded-full w-2/3"></div>
-                  <div className="h-4 bg-secondary/50 rounded-full w-1/2"></div>
-                </div>
-              ))
-            ) : (
-              alongRoutePlaces.map((place) => (
+          {isFetchingAlongRoute ? (
+            <Loader
+              message="Ищем интересные места по пути..."
+              className="py-16"
+              size="md"
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {alongRoutePlaces.map((place) => (
                 <PlaceCard key={place.id} place={place} />
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
       )}
 

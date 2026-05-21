@@ -95,21 +95,12 @@ export function Navbar() {
               </button>
             </div>
           ) : (
-            <>
-              <Link
-                href="/auth/login"
-                className="rounded-full border border-border px-4 py-1.5 text-sm font-medium text-foreground transition-all hover:border-foreground/40 hover:bg-foreground/5"
-              >
-                Войти
-              </Link>
-
-              <Link
-                href="/auth/register"
-                className="rounded-full bg-ww-ink px-4 py-1.5 text-sm font-semibold text-white transition-all hover:bg-ww-ink/80"
-              >
-                Зарегистрироваться
-              </Link>
-            </>
+            <Link
+              href="/auth/login"
+              className="rounded-full border border-border px-4 py-1.5 text-sm font-medium text-foreground transition-all hover:border-foreground/40 hover:bg-foreground/5"
+            >
+              Войти
+            </Link>
           )}
         </div>
 

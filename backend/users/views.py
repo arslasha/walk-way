@@ -10,8 +10,15 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.exceptions import ValidationError
 
-from .models import UserProfile
-from .serializers import UserRegisterSerializer, UserProfileSerializer
+from django.db import models
+from .models import UserProfile, Friendship
+from .serializers import (
+    UserRegisterSerializer,
+    UserProfileSerializer,
+    UserProfilePublicSerializer,
+    FriendshipListSerializer,
+    FriendshipRequestSerializer,
+)
 
 
 
@@ -269,3 +276,226 @@ class TwoFactorDisableView(APIView):
             "status": "disabled",
             "message": "Двухфакторная аутентификация отключена"
         }, status=status.HTTP_200_OK)
+
+
+class FriendRequestView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        to_user_id = request.data.get('to_user_id')
+        if not to_user_id:
+            return Response({"error": "Укажите to_user_id"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            to_user_id = int(to_user_id)
+        except (ValueError, TypeError):
+            return Response({"error": "Неверный формат to_user_id"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if to_user_id == request.user.id:
+            return Response({"error": "Вы не можете отправить запрос в друзья самому себе"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            to_user = User.objects.get(id=to_user_id)
+        except User.DoesNotExist:
+            return Response({"error": "Пользователь не найден"}, status=status.HTTP_404_NOT_FOUND)
+
+        existing = Friendship.objects.filter(
+            (models.Q(user_from=request.user, user_to=to_user) |
+             models.Q(user_from=to_user, user_to=request.user))
+        ).first()
+
+        if existing:
+            if existing.status == 'ACCEPTED':
+                return Response({"error": "Вы уже друзья"}, status=status.HTTP_400_BAD_REQUEST)
+            elif existing.status == 'BLOCKED':
+                return Response({"error": "Пользователь заблокирован"}, status=status.HTTP_400_BAD_REQUEST)
+            elif existing.status == 'PENDING':
+                if existing.user_from == request.user:
+                    return Response({"error": "Запрос уже отправлен"}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    existing.status = 'ACCEPTED'
+                    existing.save()
+                    return Response({
+                        "message": "Взаимный запрос обнаружен. Дружба успешно подтверждена!",
+                        "status": "ACCEPTED",
+                        "friendship_id": existing.id
+                    }, status=status.HTTP_200_OK)
+
+        friendship = Friendship.objects.create(
+            user_from=request.user,
+            user_to=to_user,
+            status='PENDING'
+        )
+        return Response({
+            "message": "Запрос в друзья успешно отправлен",
+            "status": "PENDING",
+            "friendship_id": friendship.id
+        }, status=status.HTTP_201_CREATED)
+
+
+class FriendRespondView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        friendship_id = request.data.get('friendship_id')
+        action = request.data.get('action')
+
+        if not friendship_id or action not in ['accept', 'decline']:
+            return Response({"error": "Необходимы параметры friendship_id и action ('accept'/'decline')"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            friendship = Friendship.objects.get(id=friendship_id)
+        except Friendship.DoesNotExist:
+            return Response({"error": "Запрос не найден"}, status=status.HTTP_404_NOT_FOUND)
+
+        if friendship.status != 'PENDING':
+            return Response({"error": "Этот запрос уже обработан или неактивен"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if friendship.user_to != request.user:
+            return Response({"error": "Вы не являетесь получателем этого запроса"}, status=status.HTTP_403_FORBIDDEN)
+
+        if action == 'accept':
+            friendship.status = 'ACCEPTED'
+            friendship.save()
+            return Response({"message": "Запрос в друзья принят", "status": "ACCEPTED"}, status=status.HTTP_200_OK)
+        else:
+            friendship.delete()
+            return Response({"message": "Запрос в друзья отклонен", "status": "DECLINED"}, status=status.HTTP_200_OK)
+
+
+class FriendBlockView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        to_user_id = request.data.get('to_user_id')
+        if not to_user_id:
+            return Response({"error": "Укажите to_user_id для блокировки"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            to_user_id = int(to_user_id)
+        except (ValueError, TypeError):
+            return Response({"error": "Неверный формат to_user_id"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if to_user_id == request.user.id:
+            return Response({"error": "Вы не можете заблокировать самого себя"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            to_user = User.objects.get(id=to_user_id)
+        except User.DoesNotExist:
+            return Response({"error": "Пользователь не найден"}, status=status.HTTP_404_NOT_FOUND)
+
+        friendship = Friendship.objects.filter(
+            (models.Q(user_from=request.user, user_to=to_user) |
+             models.Q(user_from=to_user, user_to=request.user))
+        ).first()
+
+        if friendship:
+            friendship.user_from = request.user
+            friendship.user_to = to_user
+            friendship.status = 'BLOCKED'
+            friendship.save()
+        else:
+            friendship = Friendship.objects.create(
+                user_from=request.user,
+                user_to=to_user,
+                status='BLOCKED'
+            )
+
+        return Response({"message": "Пользователь успешно заблокирован", "status": "BLOCKED"}, status=status.HTTP_200_OK)
+
+
+class FriendsListView(generics.ListAPIView):
+    serializer_class = FriendshipListSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    pagination_class = None
+
+    def get_queryset(self):
+        return Friendship.objects.filter(
+            (models.Q(user_from=self.request.user) | models.Q(user_to=self.request.user)),
+            status='ACCEPTED'
+        ).select_related('user_from', 'user_to', 'user_from__profile', 'user_to__profile')
+
+
+class FriendRequestsView(generics.ListAPIView):
+    serializer_class = FriendshipRequestSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    pagination_class = None
+
+    def get_queryset(self):
+        return Friendship.objects.filter(
+            (models.Q(user_from=self.request.user) | models.Q(user_to=self.request.user)),
+            status='PENDING'
+        ).select_related('user_from', 'user_to', 'user_from__profile', 'user_to__profile')
+
+
+class FriendshipDeleteView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            friendship = Friendship.objects.get(id=pk)
+        except Friendship.DoesNotExist:
+            return Response({"error": "Связь не найдена"}, status=status.HTTP_404_NOT_FOUND)
+
+        if friendship.user_from != request.user and friendship.user_to != request.user:
+            return Response({"error": "Вы не являетесь участником этой связи"}, status=status.HTTP_403_FORBIDDEN)
+
+        if friendship.status == 'BLOCKED' and friendship.user_from != request.user:
+            return Response({"error": "Вы не можете разблокировать этого пользователя"}, status=status.HTTP_403_FORBIDDEN)
+
+        friendship.delete()
+        return Response({"message": "Успешно удалено", "status": "DELETED"}, status=status.HTTP_200_OK)
+
+
+
+
+class PublicProfileDetailView(generics.RetrieveAPIView):
+    serializer_class = UserProfilePublicSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    lookup_field = 'nickname'
+
+    def get_queryset(self):
+        blocked_user_ids = Friendship.objects.filter(
+            (models.Q(user_from=self.request.user) | models.Q(user_to=self.request.user)) &
+            models.Q(status='BLOCKED')
+        ).values_list('user_from_id', 'user_to_id')
+
+        blocked_ids = set()
+        for f_id, t_id in blocked_user_ids:
+            blocked_ids.add(f_id)
+            blocked_ids.add(t_id)
+        blocked_ids.discard(self.request.user.id)
+
+        return UserProfile.objects.exclude(user_id__in=blocked_ids)
+
+
+class PublicProfileSearchView(generics.ListAPIView):
+    serializer_class = UserProfilePublicSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    pagination_class = None
+
+    def get_queryset(self):
+        query = self.request.query_params.get('q', '')
+        if not query:
+            return UserProfile.objects.none()
+
+        blocked_user_ids = Friendship.objects.filter(
+            (models.Q(user_from=self.request.user) | models.Q(user_to=self.request.user)) &
+            models.Q(status='BLOCKED')
+        ).values_list('user_from_id', 'user_to_id')
+
+        blocked_ids = set()
+        for f_id, t_id in blocked_user_ids:
+            blocked_ids.add(f_id)
+            blocked_ids.add(t_id)
+        blocked_ids.discard(self.request.user.id)
+
+        return UserProfile.objects.exclude(
+            user_id__in=blocked_ids
+        ).exclude(
+            user=self.request.user
+        ).filter(
+            nickname__icontains=query
+        ).select_related('user', 'user__profile')
+
+

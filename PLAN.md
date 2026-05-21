@@ -62,11 +62,12 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 - [x] **Task 008:** MapLibre Integration & Route Visualization.
 - [x] **Task 009:** Map Bottom Sheet & Interactive UX (Vaul, responsive multi-snap drawer, quick-add recommendations, map-marker synchronization).
 - [x] **Task 010:** Backend Routing API & "Along the Way" Spatial Queries.
-- [ ] **Task 011:** Frontend Routing Polish & Loop Routes (Круговые маршруты).
+- [x] **Task 011:** Frontend Routing Polish & Loop Routes (Круговые маршруты).
 - [x] **Task 012:** Backend Advanced Filters (Time, Weather, Budget) & Loop Logic.
 - [x] **Task 013:** Fix Route Rendering & Client-Side CORS Issues (django-cors-headers, MapLibre layer fixes, tag viewset pagination).
 - [x] **Task 014:** QA Routing & Spatial API Auto-tests (PyTest backend mocks, Zustand store unit tests, map/bottom-sheet integration).
 - [x] **Task 020:** Frontend UX/UI Improvements & Bug Fixes (Map tooltips, header cleanup, unified loader, place modals, toast fixes, tag scroll).
+- [ ] **Task 021:** Backend Data Ingestion Scale-up (Scale database with 1000+ places in Moscow via KudaGo API pagination, bulk creation, limit argument, handling API rate limits and categories).
 
 ### Backlog
 - [ ] **Saved & Shared Routes:** Moving towards phase 3, but preparing route models on backend.
@@ -80,6 +81,7 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 - [x] **Task 017:** Personal Folders & Place Collections (Backend & Frontend).
 - [x] **Task 018:** Social Graph, User Search & Friend Profiles (Backend & Frontend).
 - [ ] **Task 019:** QA: Security, Accounts, Collections & Social API Auto-tests.
+- [ ] **Task 022:** Frontend Favorites & Collections Modal UX (Redesign place favorites flow to use a custom modal matching the size of the place details modal, support auto-saving to default 'Favorites' folder, allow changing folders for already saved places, and implement modal stacking/temporary hiding of the parent details modal).
 
 ### Backlog & Future Tasks
 - [ ] **Saved & Shared Routes:** Generate unique URLs to share custom walking routes with friends or partners.

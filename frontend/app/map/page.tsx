@@ -39,31 +39,40 @@ export default function MapPage() {
     setMounted(true);
   }, []);
 
-  // Reset fit bounds when route changes so we re-fit for the new route
+  // Reset fit bounds when route or route geometry changes so we re-fit for the new path
   useEffect(() => {
     setHasFitBounds(false);
-  }, [route]);
+  }, [route, routeGeometry]);
 
   // Calculate bounds based on route
   useEffect(() => {
     if (!mapRef.current || route.length === 0 || !isMapLoaded || hasFitBounds) return;
 
     const bounds = new maplibregl.LngLatBounds();
-    route.forEach((place) => {
-      bounds.extend([place.geometry.coordinates[0], place.geometry.coordinates[1]]);
-    });
+    
+    // Frame the actual route geometry if available for a perfect fit
+    if (routeGeometry && routeGeometry.coordinates && routeGeometry.coordinates.length > 0) {
+      routeGeometry.coordinates.forEach((coord: [number, number]) => {
+        bounds.extend(coord);
+      });
+    } else {
+      route.forEach((place) => {
+        bounds.extend([place.geometry.coordinates[0], place.geometry.coordinates[1]]);
+      });
+    }
 
     if (!bounds.isEmpty()) {
       const isDesktop = window.innerWidth >= 768;
       mapRef.current.fitBounds(bounds, {
         padding: {
           top: 80,
-          bottom: 80,
-          left: isDesktop ? 420 : 60, // Shift center to the right to avoid overlapping with desktop sidebar
+          bottom: window.innerHeight * 0.4, // give space for bottom sheet on mobile
+          left: isDesktop ? 420 : 60,
           right: 60,
         },
         maxZoom: 16,
-        duration: 1000,
+        duration: 1200,
+        essential: true,
       });
       setHasFitBounds(true);
     }

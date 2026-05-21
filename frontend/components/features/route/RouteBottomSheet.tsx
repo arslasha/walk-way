@@ -10,7 +10,9 @@ import {
   Coffee, 
   Palmtree, 
   Building2,
-  Loader2
+  Loader2,
+  Route as RouteIcon,
+  Repeat
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -50,7 +52,10 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
     steps,
     alongRoutePlaces,
     isCalculatingRoute,
-    isFetchingAlongRoute
+    isFetchingAlongRoute,
+    isLoopRoute,
+    loopDurationMinutes,
+    setLoopMode
   } = useRouteStore();
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -300,6 +305,55 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
               {steps.toLocaleString("ru-RU")}
             </div>
           </div>
+        </div>
+
+        {/* Route Type & Settings */}
+        <div className="mb-3 shrink-0 space-y-2">
+          <div className="flex bg-secondary/40 p-1 rounded-2xl border border-border/40">
+            <button
+              onClick={() => setLoopMode(false)}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-bold rounded-xl transition-all",
+                !isLoopRoute 
+                  ? "bg-surface shadow-sm text-foreground" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <RouteIcon className="w-3.5 h-3.5" />
+              Обычный
+            </button>
+            <button
+              onClick={() => setLoopMode(true)}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-bold rounded-xl transition-all",
+                isLoopRoute 
+                  ? "bg-surface shadow-sm text-foreground" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Repeat className="w-3.5 h-3.5" />
+              Круговой
+            </button>
+          </div>
+          
+          {isLoopRoute && (
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+              {[30, 60, 90, 120].map((mins) => (
+                <button
+                  key={mins}
+                  onClick={() => setLoopMode(true, mins)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all shrink-0",
+                    loopDurationMinutes === mins
+                      ? "bg-accent border-accent text-white shadow-sm"
+                      : "bg-surface border-border text-muted-foreground hover:text-foreground hover:border-accent/40"
+                  )}
+                >
+                  {mins === 30 ? "30 мин" : mins === 60 ? "1 час" : mins === 90 ? "1.5 часа" : "2 часа"}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Draggable points list */}

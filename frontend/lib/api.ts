@@ -71,6 +71,37 @@ export async function calculateRoute(placeIds: number[]): Promise<{ geometry: an
   return res.json();
 }
 
+export async function calculateLoopRoute(options: { 
+  startCoords: [number, number], 
+  distance: number, 
+  vibes?: string[], 
+  category?: string 
+}): Promise<{ route: { geometry: any; distance: number; duration: number }, places: PlaceFeature[] }> {
+  const res = await fetch(`${API_BASE_URL}/routes/calculate/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ 
+      is_loop: true, 
+      start_coords: options.startCoords,
+      distance: options.distance,
+      vibes: options.vibes || [],
+      category: options.category
+    }),
+  });
+  if (!res.ok) {
+    throw new Error("Failed to calculate loop route");
+  }
+  const data = await res.json();
+  const placesArray = Array.isArray(data.places) ? data.places : (data.places?.features || []);
+  
+  return {
+    ...data,
+    places: placesArray
+  };
+}
+
 export async function getPlacesAlongRoute(
   route: any,
   buffer: number = 150,

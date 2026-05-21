@@ -58,6 +58,7 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 - [ ] **Task 012:** Backend Advanced Filters (Time, Weather, Budget) & Loop Logic.
 - [x] **Task 013:** Fix Route Rendering & Client-Side CORS Issues (django-cors-headers, MapLibre layer fixes, tag viewset pagination).
 - [x] **Task 014:** QA Routing & Spatial API Auto-tests (PyTest backend mocks, Zustand store unit tests, map/bottom-sheet integration).
+- [ ] **Task 020:** Frontend UX/UI Improvements & Bug Fixes (Map tooltips, header cleanup, unified loader, place modals, toast fixes, tag scroll).
 
 ### Backlog
 - [ ] **Saved & Shared Routes:** Moving towards phase 3, but preparing route models on backend.
@@ -69,7 +70,7 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 - [x] **Task 015:** JWT Authentication, Registration & Optional 2FA (Backend).
 - [x] **Task 016:** Auth Forms, User Dashboard & Profile Editing UI (Frontend).
 - [x] **Task 017:** Personal Folders & Place Collections (Backend & Frontend).
-- [ ] **Task 018:** Social Graph, User Search & Friend Profiles (Backend & Frontend).
+- [x] **Task 018:** Social Graph, User Search & Friend Profiles (Backend & Frontend).
 - [ ] **Task 019:** QA: Security, Accounts, Collections & Social API Auto-tests.
 
 ### Backlog & Future Tasks

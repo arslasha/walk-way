@@ -260,7 +260,12 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
           </h3>
           {route.length > 0 && (
             <button
-              onClick={clearRoute}
+              onClick={() => {
+                if (window.confirm("Вы уверены, что хотите полностью очистить маршрут?")) {
+                  clearRoute();
+                  toast.success("Маршрут очищен");
+                }
+              }}
               className="p-1.5 text-muted-foreground hover:text-error transition-colors rounded-full hover:bg-secondary"
               title="Очистить маршрут"
             >

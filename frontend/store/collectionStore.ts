@@ -121,12 +121,7 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
         body: JSON.stringify({ place_id: placeId }),
       });
       if (!res.ok) throw new Error("Не удалось добавить место");
-      // Update local places_count optimistically
-      set((state) => ({
-        collections: state.collections.map((c) =>
-          c.id === collectionId ? { ...c, places_count: c.places_count + 1 } : c
-        ),
-      }));
+      await get().fetchCollections();
       return true;
     } catch {
       return false;
@@ -144,17 +139,7 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
         body: JSON.stringify({ place_id: placeId }),
       });
       if (!res.ok) throw new Error("Не удалось удалить место");
-      set((state) => ({
-        collections: state.collections.map((c) =>
-          c.id === collectionId
-            ? {
-                ...c,
-                places_count: Math.max(0, c.places_count - 1),
-                places: c.places?.filter((p) => p.id !== placeId),
-              }
-            : c
-        ),
-      }));
+      await get().fetchCollections();
       return true;
     } catch {
       return false;

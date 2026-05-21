@@ -42,7 +42,7 @@ export default async function ExplorePage({
           <div className="flex flex-nowrap items-center gap-2">
             <Link
               href="/explore"
-              className={`chip whitespace-nowrap ${currentTags.length === 0 ? "chip-active" : ""}`}
+              className={`chip whitespace-nowrap shrink-0 ${currentTags.length === 0 ? "chip-active" : ""}`}
               draggable={false}
             >
               все вайбы
@@ -76,7 +76,7 @@ export default async function ExplorePage({
                 <Link
                   key={vibe.id}
                   href={href}
-                  className={`chip whitespace-nowrap ${isActive ? "chip-active" : ""}`}
+                  className={`chip whitespace-nowrap shrink-0 ${isActive ? "chip-active" : ""}`}
                   draggable={false}
                 >
                   {vibe.name}

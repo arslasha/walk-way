@@ -39,6 +39,14 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
   - Integrated `django-cors-headers` package and middleware to solve cross-origin blocking on route calculations.
   - Resolved `500 Internal Server Error` on Tag and Category viewsets by disabling Global GeoJson Pagination for standard non-spatial endpoints.
   - Fixed MapLibre GL polyline route layers disappearing during theme switching by dynamically keying the `<Source>` layer with the `resolvedTheme` state, forcing clean reactive remounting on style reload.
+- [x] **Frontend UX/UI Improvements (Task 020):**
+  - Upgraded MapLibre tooltips to display place photos and addresses.
+  - Cleaned up Header Navigation by removing redundant "Sign Up" and "Saved" items.
+  - Implemented a unified, text-customizable `Loader` component.
+  - Created animated Place Detail modal dialog with quick routing/saving actions.
+  - Configured `Toaster` component for auto-dismissal.
+  - Added confirmation interceptor on route clearing.
+  - Improved horizontal vibe tags scroll container layout and styling for dark mode.
 
 ### Next Steps (To-Do)
 - [x] **UI/UX Polish:** Implement Loading Skeletons for the feed, proper Empty States for filtered results, and Toast notifications for geolocation errors.
@@ -58,7 +66,7 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 - [ ] **Task 012:** Backend Advanced Filters (Time, Weather, Budget) & Loop Logic.
 - [x] **Task 013:** Fix Route Rendering & Client-Side CORS Issues (django-cors-headers, MapLibre layer fixes, tag viewset pagination).
 - [x] **Task 014:** QA Routing & Spatial API Auto-tests (PyTest backend mocks, Zustand store unit tests, map/bottom-sheet integration).
-- [ ] **Task 020:** Frontend UX/UI Improvements & Bug Fixes (Map tooltips, header cleanup, unified loader, place modals, toast fixes, tag scroll).
+- [x] **Task 020:** Frontend UX/UI Improvements & Bug Fixes (Map tooltips, header cleanup, unified loader, place modals, toast fixes, tag scroll).
 
 ### Backlog
 - [ ] **Saved & Shared Routes:** Moving towards phase 3, but preparing route models on backend.

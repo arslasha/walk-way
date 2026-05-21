@@ -316,6 +316,7 @@ All buttons: `border-radius: 10px`, `padding: 10px 20px`, `font-weight: 600`, `f
 | 2026-05-18 | **Map Bottom Sheet & Interactive UX.** Added `vaul` responsive bottom sheet with custom metrics, quick-add recommendations, and map-marker centering/highlighting. | agent |
 | 2026-05-18 | **Smart POIs & Route Path Rendering.** Added interactive map polyline paths with glowing effects, along-route "Smart POIs" dots, and interactive "Add to route" click popups. | agent |
 | 2026-05-19 | **Personal Folders & Place Collections.** Integrated `SaveToCollectionButton` on cards, built `/profile` folders tab dashboard with folder CRUD and item removal. | agent |
+| 2026-05-21 | **UX/UI Improvements & Bug Fixes.** Added confirm on clear route, auto-dismissible Toasts, active chip accent design, and horizontal tags scroll. | agent |
 
 
 ---

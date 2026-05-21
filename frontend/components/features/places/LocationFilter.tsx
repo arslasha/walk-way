@@ -48,7 +48,7 @@ export function LocationFilter() {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 shrink-0">
       <button
         onClick={toggleLocation}
         disabled={isLoading}

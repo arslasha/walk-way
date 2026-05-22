@@ -7,6 +7,7 @@ import { Plus, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SaveToCollectionButton } from "@/components/collections/SaveToCollectionButton";
 import { PlaceDetailModal } from "./PlaceDetailModal";
+import { ImageWithLoader } from "@/components/ui/ImageWithLoader";
 
 interface PlaceCardProps {
   place: PlaceFeature;
@@ -40,10 +41,9 @@ export function PlaceCard({ place }: PlaceCardProps) {
       >
         <div className="relative aspect-[3/2] bg-gradient-to-br from-stone-300 to-stone-400 shrink-0">
           {p.photos && p.photos.length > 0 && (
-            <img
+            <ImageWithLoader
               src={p.photos[0]}
               alt={p.title}
-              className="h-full w-full object-cover"
             />
           )}
           {p.category && (

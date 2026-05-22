@@ -1,4 +1,5 @@
 import type { PlaceFeature } from "@/types/place";
+import { ImageWithLoader } from "@/components/ui/ImageWithLoader";
 
 interface PlaceCardSmallProps {
   place: PlaceFeature;
@@ -11,10 +12,9 @@ export function PlaceCardSmall({ place }: PlaceCardSmallProps) {
     <div className="group overflow-hidden rounded-[28px] border border-border bg-card transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_8px_24px_rgba(15,14,23,0.08)] dark:hover:shadow-[0_8px_32px_rgba(0,0,0,0.35)] flex flex-col h-full">
       <div className="relative aspect-[3/2] bg-gradient-to-br from-stone-200 to-stone-300 shrink-0">
         {p.photos && p.photos.length > 0 && (
-          <img
+          <ImageWithLoader
             src={p.photos[0]}
             alt={p.title}
-            className="h-full w-full object-cover"
           />
         )}
         {p.category && (

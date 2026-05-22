@@ -38,6 +38,9 @@ export interface PlaceFeature {
 
 export interface PlaceFeatureCollection {
   type: "FeatureCollection";
+  count?: number;
+  next?: string | null;
+  previous?: string | null;
   features: PlaceFeature[];
 }
 
@@ -48,4 +51,5 @@ export interface PlaceFilters {
   lat?: number;
   lon?: number;
   radius?: number;
+  page?: number;
 }

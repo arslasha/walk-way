@@ -6,6 +6,7 @@ import type { PlaceFeature } from "@/types/place";
 import { useRouteStore } from "@/store/routeStore";
 import { SaveToCollectionButton } from "@/components/collections/SaveToCollectionButton";
 import { cn } from "@/lib/utils";
+import { ImageWithLoader } from "@/components/ui/ImageWithLoader";
 
 interface PlaceDetailModalProps {
   place: PlaceFeature | null;
@@ -75,10 +76,9 @@ export function PlaceDetailModal({ place, onClose }: PlaceDetailModalProps) {
         {/* Hero Image */}
         <div className="relative aspect-[16/9] w-full shrink-0 bg-gradient-to-br from-stone-300 to-stone-400 overflow-hidden">
           {p.photos && p.photos.length > 0 ? (
-            <img
+            <ImageWithLoader
               src={p.photos[0]}
               alt={p.title}
-              className="h-full w-full object-cover"
             />
           ) : (
             <div className="h-full w-full flex items-center justify-center text-stone-500 text-sm">

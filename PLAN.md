@@ -67,7 +67,7 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 - [x] **Task 013:** Fix Route Rendering & Client-Side CORS Issues (django-cors-headers, MapLibre layer fixes, tag viewset pagination).
 - [x] **Task 014:** QA Routing & Spatial API Auto-tests (PyTest backend mocks, Zustand store unit tests, map/bottom-sheet integration).
 - [x] **Task 020:** Frontend UX/UI Improvements & Bug Fixes (Map tooltips, header cleanup, unified loader, place modals, toast fixes, tag scroll).
-- [ ] **Task 021:** Backend Data Ingestion Scale-up (Scale database with 1000+ places in Moscow via KudaGo API pagination, bulk creation, limit argument, handling API rate limits and categories).
+- [x] **Task 021:** Backend Data Ingestion Scale-up (Scale database with 1000+ places in Moscow via KudaGo API pagination, bulk creation, limit argument, handling API rate limits and categories).
 
 ### Backlog
 - [ ] **Saved & Shared Routes:** Moving towards phase 3, but preparing route models on backend.

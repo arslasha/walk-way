@@ -87,7 +87,17 @@ export default async function ExplorePage({
         </DraggableScrollContainer>
 
         {/* Explore Feed: 2-col editorial grid */}
-        <ExploreFeed initialPlaces={places?.features || []} />
+        <ExploreFeed 
+          initialPlaces={places?.features || []} 
+          initialHasNextPage={!!places?.next}
+          filters={{
+            tags: resolvedParams.tags as string,
+            category: resolvedParams.category as string,
+            lat: resolvedParams.lat ? parseFloat(resolvedParams.lat as string) : undefined,
+            lon: resolvedParams.lon ? parseFloat(resolvedParams.lon as string) : undefined,
+            radius: resolvedParams.radius ? parseFloat(resolvedParams.radius as string) : undefined,
+          }}
+        />
       </div>
       
       <RouteDrawer />

@@ -24,6 +24,7 @@ export async function getPlaces(filters?: PlaceFilters): Promise<PlaceFeatureCol
     if (filters.lat) url.searchParams.append("lat", filters.lat.toString());
     if (filters.lon) url.searchParams.append("lon", filters.lon.toString());
     if (filters.radius) url.searchParams.append("radius", filters.radius.toString());
+    if (filters.page) url.searchParams.append("page", filters.page.toString());
   }
 
   const res = await fetch(url.toString(), { next: { revalidate: 60 } }); // Cache for 60 seconds

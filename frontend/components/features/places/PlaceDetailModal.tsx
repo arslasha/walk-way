@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { X, MapPin, Tag, Plus, Check, Bookmark } from "lucide-react";
 import type { PlaceFeature } from "@/types/place";
 import { useRouteStore } from "@/store/routeStore";
@@ -27,11 +27,13 @@ export function PlaceDetailModal({ place, onClose }: PlaceDetailModalProps) {
     }
   };
 
+  const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape" && !isCollectionModalOpen) onClose();
     },
-    [onClose]
+    [onClose, isCollectionModalOpen]
   );
 
   useEffect(() => {
@@ -177,6 +179,7 @@ export function PlaceDetailModal({ place, onClose }: PlaceDetailModalProps) {
           <SaveToCollectionButton
             placeId={place.id as number}
             className="shrink-0"
+            onModalStateChange={setIsCollectionModalOpen}
           />
           <button
             onClick={handleToggleRoute}

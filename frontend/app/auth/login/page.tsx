@@ -75,17 +75,17 @@ export default function LoginPage() {
         <div className="pointer-events-none absolute -right-40 -bottom-40 h-[600px] w-[600px] rounded-full bg-accent/5 blur-[120px]" />
 
         <div className="relative w-full max-w-[480px] overflow-hidden rounded-[40px] border border-border bg-surface/60 p-8 shadow-2xl backdrop-blur-xl md:p-12 transition-all">
-          
+
           {/* Logo / Brand subtitle */}
           <div className="mb-8 text-center">
             <span className="font-heading text-xs font-bold tracking-[0.2em] text-accent uppercase">
               walk-way
             </span>
             <h1 className="mt-2 font-heading text-[48px] font-extrabold leading-[1.0] tracking-tight text-foreground lowercase">
-              {twoFactorRequired ? "защита" : "войти"}
+              {twoFactorRequired ? "введите код" : "войти"}
             </h1>
             <p className="mt-3 text-sm text-muted-foreground">
-              {twoFactorRequired 
+              {twoFactorRequired
                 ? "введите 6-значный одноразовый код или резервный код"
                 : "городской гид по вайбу ждёт вас"
               }
@@ -171,7 +171,7 @@ export default function LoginPage() {
             /* OTP Form */
             <form onSubmit={handleOtpSubmit} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase pl-3">
+                <label className="block text-center text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                   код подтверждения 2FA
                 </label>
                 <div className="relative">
@@ -184,7 +184,7 @@ export default function LoginPage() {
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value)}
                     placeholder="000000"
-                    className="w-full h-14 pl-12 pr-4 rounded-[28px] border border-border bg-surface/80 text-foreground placeholder:text-muted-foreground/60 focus:border-accent focus:outline-none transition-all tracking-[0.2em] font-mono text-center text-lg"
+                    className="w-full h-14 px-12 rounded-[28px] border border-border bg-surface/80 text-foreground placeholder:text-muted-foreground/60 focus:border-accent focus:outline-none transition-all tracking-[0.2em] font-mono text-center text-lg"
                     required
                     autoFocus
                   />

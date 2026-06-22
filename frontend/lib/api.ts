@@ -1,4 +1,4 @@
-import { PlaceFeatureCollection, Category, Tag, PlaceFilters } from "@/types/place";
+import { PlaceFeatureCollection, PlaceFeature, Category, Tag, PlaceFilters } from "@/types/place";
 
 const getApiBaseUrl = () => {
   if (typeof window === "undefined") {

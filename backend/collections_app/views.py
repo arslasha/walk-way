@@ -3,18 +3,26 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 from places.models import Place
+from users.models import Friendship
 from .models import Collection
 from .serializers import CollectionSerializer, CollectionDetailSerializer
 
 
 class IsOwner(permissions.BasePermission):
-    """Object-level permission: only the collection owner can modify it."""
+    """Object-level permission: only the collection owner can modify it or safe read if friends and public."""
     def has_object_permission(self, request, view, obj):
-        # Read permissions for public collections (if method is safe)
-        if request.method in permissions.SAFE_METHODS and obj.is_public:
+        if obj.owner == request.user:
             return True
-        return obj.owner == request.user
+        if request.method in permissions.SAFE_METHODS and obj.is_public:
+            # Check if there is an accepted friendship between request.user and obj.owner
+            return Friendship.objects.filter(
+                (Q(user_from=request.user, user_to=obj.owner) |
+                 Q(user_from=obj.owner, user_to=request.user)),
+                status='ACCEPTED'
+            ).exists()
+        return False
 
 
 class CollectionListCreateView(generics.ListCreateAPIView):

@@ -84,7 +84,6 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 - [x] **Task 022:** Frontend Favorites & Collections Modal UX (Redesign place favorites flow to use a custom modal matching the size of the place details modal, support auto-saving to default 'Favorites' folder, allow changing folders for already saved places, and implement modal stacking/temporary hiding of the parent details modal).
 - [x] **Task 023:** Frontend Infinite Scroll for Explore Feed (Implement infinite scroll pagination on the /explore page using IntersectionObserver or a custom scroll handler. Adapt the `getPlaces` fetch wrapper to support the `page` query parameter, handle the paginated GeoJSON `FeatureCollection` format on the frontend, and add a loading spinner or skeleton at the bottom of the feed for seamless loading of Moscow's 800+ places).
 
-
 ### Backlog & Future Tasks
 - [ ] **Saved & Shared Routes:** Generate unique URLs to share custom walking routes with friends or partners.
 - [ ] **WebSockets & Real-Time Collaboration:** Jointly build and edit a route with a friend on the map in real-time.

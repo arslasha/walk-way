@@ -30,7 +30,6 @@ class CollectionListCreateView(generics.ListCreateAPIView):
     GET  /api/v1/collections/   → list current user's collections (with places)
     POST /api/v1/collections/   → create a new collection
     """
-    # Use detail serializer for GET (includes places) but basic for POST
     permission_classes = [permissions.IsAuthenticated]
     # Disable global GeoJsonPagination — this is not a GeoJSON endpoint
     pagination_class = None
@@ -73,7 +72,7 @@ class CollectionAddPlaceView(APIView):
         collection = get_object_or_404(Collection, pk=pk, owner=request.user)
         place_id = request.data.get("place_id")
         if not place_id:
-            return Response({"error": "пласс place_id обязателен"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "place_id обязателен"}, status=status.HTTP_400_BAD_REQUEST)
 
         place = get_object_or_404(Place, pk=place_id)
         collection.places.add(place)
@@ -91,7 +90,7 @@ class CollectionRemovePlaceView(APIView):
         collection = get_object_or_404(Collection, pk=pk, owner=request.user)
         place_id = request.data.get("place_id")
         if not place_id:
-            return Response({"error": "пласс place_id обязателен"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "place_id обязателен"}, status=status.HTTP_400_BAD_REQUEST)
 
         place = get_object_or_404(Place, pk=place_id)
         collection.places.remove(place)

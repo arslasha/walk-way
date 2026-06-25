@@ -23,3 +23,7 @@ pyotp~=2.9.0
 
 # Image Processing (Avatars)
 Pillow~=10.2.0
+
+# Production Server
+gunicorn~=22.0.0
+

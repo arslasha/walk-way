@@ -60,6 +60,22 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [pointerStartY, setPointerStartY] = useState<number | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== "undefined") {
+      setIsCollapsed(window.innerWidth < 768);
+    }
+  }, []);
+
+  // Auto-expand when a new place is added
+  useEffect(() => {
+    if (route.length > 0) {
+      setIsCollapsed(false);
+    }
+  }, [route.length]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -71,10 +87,6 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   if (!mounted) return null;
 
@@ -93,6 +105,25 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
       const newIndex = route.findIndex((p) => p.id.toString() === over.id);
       reorderPlaces(arrayMove(route, oldIndex, newIndex));
     }
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    setPointerStartY(e.clientY);
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (pointerStartY === null) return;
+    const deltaY = e.clientY - pointerStartY;
+    
+    if (Math.abs(deltaY) > 10) {
+      if (deltaY < 0 && isCollapsed) setIsCollapsed(false);
+      else if (deltaY > 0 && !isCollapsed) setIsCollapsed(true);
+    } else {
+      setIsCollapsed(!isCollapsed);
+    }
+    setPointerStartY(null);
+    (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
   };
 
   const handleStartRoute = () => {
@@ -129,15 +160,15 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
 
   // Helper to render the draggable points list
   const renderPointsList = () => (
-    <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar py-2">
+    <div className="py-1">
       {route.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-          <div className="h-14 w-14 rounded-full bg-secondary/50 flex items-center justify-center mb-3">
-            <Compass className="h-7 w-7 text-muted-foreground animate-pulse" />
+        <div className="flex flex-col items-center justify-center py-6 px-4 text-center">
+          <div className="h-12 w-12 rounded-full bg-secondary/50 flex items-center justify-center mb-2">
+            <Compass className="h-6 w-6 text-muted-foreground animate-pulse" />
           </div>
           <h4 className="text-body-md font-bold text-foreground mb-1">Маршрут пуст</h4>
           <p className="text-xs text-muted-foreground max-w-xs">
-            Добавьте места на вкладке «Исследовать» или воспользуйтесь рекомендациями ниже.
+            Добавьте места или воспользуйтесь рекомендациями.
           </p>
         </div>
       ) : (
@@ -171,8 +202,8 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
 
   // Helper to render Quick Add search & recommended grid
   const renderQuickAdd = () => (
-    <div className="mt-4 border-t border-border/80 pt-4 flex-shrink-0">
-      <div className="flex items-center justify-between mb-3">
+    <div className="flex flex-col">
+      <div className="flex items-center justify-between mb-2 shrink-0">
         <h4 className="text-[13px] font-bold text-foreground flex items-center gap-1.5">
           <Sparkles className="h-3.5 w-3.5 text-accent" />
           Быстрое добавление
@@ -180,7 +211,7 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
         {selectedCategory && (
           <button 
             onClick={() => setSelectedCategory(null)}
-            className="text-[11px] text-accent hover:underline font-semibold"
+            className="text-[11px] text-accent hover:underline font-semibold active:opacity-70 transition-opacity"
           >
             Сбросить
           </button>
@@ -188,7 +219,7 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
       </div>
 
       {/* Category Horizontal list */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2.5">
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2 shrink-0">
         {categoriesList.map((cat) => {
           const Icon = cat.icon;
           const isSelected = selectedCategory === cat.slug;
@@ -197,7 +228,7 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
               key={cat.slug}
               onClick={() => setSelectedCategory(isSelected ? null : cat.slug)}
               className={cn(
-                "flex items-center gap-1 px-3 py-1.5 rounded-full border text-[11px] font-bold transition-all shrink-0",
+                "flex items-center gap-1 px-3 py-1.5 rounded-full border text-[11px] font-bold transition-all shrink-0 active:scale-95",
                 isSelected
                   ? "bg-accent border-accent text-white shadow-sm"
                   : "bg-surface border-border text-muted-foreground hover:text-foreground hover:border-accent/40"
@@ -211,9 +242,9 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
       </div>
 
       {/* Filtered quick recommendations */}
-      <div className="max-h-40 overflow-y-auto no-scrollbar space-y-2 mt-1">
+      <div className="space-y-2 min-h-[90px]">
         {isFetchingAlongRoute ? (
-          <div className="flex flex-col items-center justify-center py-6">
+          <div className="flex flex-col items-center justify-center py-4">
             <Loader2 className="h-5 w-5 animate-spin text-accent mb-2" />
             <p className="text-[10px] text-muted-foreground">Ищем интересные места по пути...</p>
           </div>
@@ -224,7 +255,7 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
               : "Все места добавлены или ничего не найдено."}
           </p>
         ) : (
-          filteredRecommendations.map((place) => (
+          filteredRecommendations.slice(0, 10).map((place) => (
             <div 
               key={place.id} 
               className="flex items-center justify-between p-2.5 rounded-2xl border border-border bg-surface hover:border-accent/30 transition-all"
@@ -239,7 +270,7 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
                   addPlace(place);
                   toast.success(`Добавлено: ${place.properties.title}`);
                 }}
-                className="px-2.5 py-1 rounded-full bg-secondary text-accent text-[10px] font-bold hover:bg-accent hover:text-white transition-all shrink-0"
+                className="px-2.5 py-1 rounded-full bg-secondary text-accent text-[10px] font-bold hover:bg-accent hover:text-white transition-all shrink-0 active:scale-90"
               >
                 +
               </button>
@@ -251,8 +282,27 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
   );
 
   return (
-    <div className="fixed left-4 right-4 md:left-6 md:right-auto md:w-96 top-[88px] md:top-[96px] bottom-4 md:bottom-6 z-30 flex flex-col bg-background/95 backdrop-blur-md border border-border rounded-[40px] shadow-2xl overflow-hidden pointer-events-auto">
-      <div className="p-5 flex flex-col h-full overflow-hidden select-none">
+    <div className={cn(
+      "fixed z-30 flex flex-col bg-background/95 backdrop-blur-md border border-border shadow-2xl overflow-hidden pointer-events-auto transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] select-none",
+      isCollapsed
+        ? "left-4 right-4 bottom-4 h-[146px] rounded-[32px]" 
+        : "left-4 right-4 top-[88px] bottom-4 rounded-[40px]",
+      "md:left-6 md:right-auto md:w-96 md:top-[96px] md:bottom-6 md:h-auto md:rounded-[40px]"
+    )}>
+      <div className={cn(
+        "flex flex-col h-full overflow-hidden",
+        isCollapsed ? "p-4" : "p-5"
+      )}>
+        {/* Mobile Drag Handle */}
+        <div
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+          className="flex md:hidden justify-center py-2 -mt-2 mb-2 cursor-grab active:cursor-grabbing touch-none"
+          aria-label={isCollapsed ? "Развернуть маршрут" : "Свернуть маршрут"}
+        >
+          <div className="w-12 h-1.5 bg-border rounded-full hover:bg-muted-foreground/30 transition-colors" />
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between mb-3 shrink-0">
           <h3 className="text-body-lg font-extrabold text-foreground tracking-tight flex items-center gap-2">
@@ -263,20 +313,22 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
               </span>
             )}
           </h3>
-          {route.length > 0 && (
-            <button
-              onClick={() => {
-                if (window.confirm("Вы уверены, что хотите полностью очистить маршрут?")) {
-                  clearRoute();
-                  toast.success("Маршрут очищен");
-                }
-              }}
-              className="p-1.5 text-muted-foreground hover:text-error transition-colors rounded-full hover:bg-secondary"
-              title="Очистить маршрут"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            {route.length > 0 && !isCollapsed && (
+              <button
+                onClick={() => {
+                  if (window.confirm("Вы уверены, что хотите полностью очистить маршрут?")) {
+                    clearRoute();
+                    toast.success("Маршрут очищен");
+                  }
+                }}
+                className="p-1.5 text-muted-foreground hover:text-error transition-all rounded-full hover:bg-secondary active:scale-90"
+                title="Очистить маршрут"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Quick Metrics display */}
@@ -307,82 +359,91 @@ export function RouteBottomSheet({ onSelectPlace, activePlaceId }: RouteBottomSh
           </div>
         </div>
 
-        {/* Route Type & Settings */}
-        <div className="mb-3 shrink-0 space-y-2">
-          <div className="flex bg-secondary/40 p-1 rounded-2xl border border-border/40">
-            <button
-              onClick={() => setLoopMode(false)}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-bold rounded-xl transition-all",
-                !isLoopRoute 
-                  ? "bg-surface shadow-sm text-foreground" 
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <RouteIcon className="w-3.5 h-3.5" />
-              Обычный
-            </button>
-            <button
-              onClick={() => setLoopMode(true)}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-bold rounded-xl transition-all",
-                isLoopRoute 
-                  ? "bg-surface shadow-sm text-foreground" 
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <Repeat className="w-3.5 h-3.5" />
-              Круговой
-            </button>
-          </div>
-          
-          {isLoopRoute && (
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-              {[30, 60, 90, 120].map((mins) => (
+        {/* Collapsible Content wrapper */}
+        <div className={cn(
+          "flex-1 flex flex-col min-h-0 transition-all duration-500",
+          isCollapsed ? "opacity-0 pointer-events-none hidden md:flex" : "opacity-100"
+        )}>
+          {/* Scrollable body */}
+          <div className="flex-1 overflow-y-auto no-scrollbar pb-2">
+            {/* Route Type & Settings */}
+            <div className="mb-3 shrink-0 space-y-2">
+              <div className="flex bg-secondary/40 p-1 rounded-2xl border border-border/40">
                 <button
-                  key={mins}
-                  onClick={() => setLoopMode(true, mins)}
+                  onClick={() => setLoopMode(false)}
                   className={cn(
-                    "px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all shrink-0",
-                    loopDurationMinutes === mins
-                      ? "bg-accent border-accent text-white shadow-sm"
-                      : "bg-surface border-border text-muted-foreground hover:text-foreground hover:border-accent/40"
+                    "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-bold rounded-xl transition-all active:scale-[0.98]",
+                    !isLoopRoute 
+                      ? "bg-surface shadow-sm text-foreground" 
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  {mins === 30 ? "30 мин" : mins === 60 ? "1 час" : mins === 90 ? "1.5 часа" : "2 часа"}
+                  <RouteIcon className="w-3.5 h-3.5" />
+                  Обычный
                 </button>
-              ))}
+                <button
+                  onClick={() => setLoopMode(true)}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-bold rounded-xl transition-all active:scale-[0.98]",
+                    isLoopRoute 
+                      ? "bg-surface shadow-sm text-foreground" 
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Repeat className="w-3.5 h-3.5" />
+                  Круговой
+                </button>
+              </div>
+              
+              {isLoopRoute && (
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                  {[30, 60, 90, 120].map((mins) => (
+                    <button
+                      key={mins}
+                      onClick={() => setLoopMode(true, mins)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all shrink-0 active:scale-95",
+                        loopDurationMinutes === mins
+                          ? "bg-accent border-accent text-white shadow-sm"
+                          : "bg-surface border-border text-muted-foreground hover:text-foreground hover:border-accent/40"
+                      )}
+                    >
+                      {mins === 30 ? "30 мин" : mins === 60 ? "1 час" : mins === 90 ? "1.5 часа" : "2 часа"}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Draggable points list */}
-        {renderPointsList()}
+            {/* Draggable points list */}
+            {renderPointsList()}
 
-        {/* Quick Add and Search section */}
-        <div className="mt-3 shrink-0">
-          <div className="relative mb-2">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Поиск мест для быстрого добавления..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-9 pl-8 pr-3 rounded-full border border-border bg-surface text-[11px] placeholder-muted-foreground focus:outline-none focus:border-accent transition-all"
-            />
+            {/* Quick Add and Search section */}
+            <div className="mt-2 pt-3 border-t border-border/80 flex flex-col shrink-0">
+              <div className="relative mb-2 shrink-0">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Поиск мест для быстрого добавления..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-9 pl-8 pr-3 rounded-full border border-border bg-surface text-[11px] placeholder-muted-foreground focus:outline-none focus:border-accent transition-all"
+                />
+              </div>
+
+              {renderQuickAdd()}
+            </div>
           </div>
 
-          {renderQuickAdd()}
-        </div>
-
-        {/* Primary CTA Action */}
-        <div className="mt-3 pt-3 border-t border-border/80 shrink-0">
-          <button
-            onClick={handleStartRoute}
-            className="w-full h-11 rounded-full bg-accent text-white text-[13px] font-bold hover:bg-accent-hover transition-colors shadow-lg shadow-accent/15"
-          >
-            Начать маршрут
-          </button>
+          {/* Primary CTA Action (Pinned to Bottom) */}
+          <div className="pt-2 border-t border-border/80 shrink-0">
+            <button
+              onClick={handleStartRoute}
+              className="w-full h-11 rounded-full bg-accent text-white text-[13px] font-bold hover:bg-accent-hover transition-all shadow-lg shadow-accent/15 active:scale-[0.98] active:bg-accent/90"
+            >
+              Начать маршрут
+            </button>
+          </div>
         </div>
       </div>
     </div>

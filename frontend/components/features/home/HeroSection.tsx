@@ -33,7 +33,7 @@ export function HeroSection() {
           </div>
         </div>
 
-        <div className="relative hidden md:flex md:w-[42%] md:items-start md:justify-end">
+        <div className="relative hidden md:flex md:w-[42%] md:items-start md:justify-end" hidden>
           <div className="relative h-72 w-full max-w-sm">
             <div className="absolute right-0 top-8 h-44 w-36 rotate-3 rounded-[24px] bg-foreground/10 shadow-xl" />
             <div className="absolute right-8 top-0 h-52 w-40 -rotate-2 overflow-hidden rounded-[24px] bg-foreground/8 shadow-2xl">

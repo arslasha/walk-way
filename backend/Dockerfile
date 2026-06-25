@@ -22,3 +22,7 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Copy project
 COPY . /app/
+
+# Start gunicorn on the dynamic Render port
+CMD gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+

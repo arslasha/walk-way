@@ -35,7 +35,7 @@ export function PlaceCard({ place }: PlaceCardProps) {
       <div
         onClick={() => setIsModalOpen(true)}
         className={cn(
-          "group overflow-hidden rounded-[40px] border bg-card transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_8px_24px_rgba(15,14,23,0.08)] dark:hover:shadow-[0_8px_32px_rgba(0,0,0,0.35)] flex flex-col relative cursor-pointer",
+          "group overflow-hidden rounded-[40px] border bg-card transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_8px_24px_rgba(15,14,23,0.08)] dark:hover:shadow-[0_8px_32px_rgba(0,0,0,0.35)] flex flex-col relative cursor-pointer active:scale-[0.98]",
           isInRoute ? "border-accent ring-2 ring-accent/20" : "border-border"
         )}
       >
@@ -78,7 +78,7 @@ export function PlaceCard({ place }: PlaceCardProps) {
               <button
                 onClick={toggleRoute}
                 className={cn(
-                  "flex h-8 items-center justify-center gap-1.5 rounded-full px-3 text-[13px] font-bold transition-colors",
+                  "flex h-8 items-center justify-center gap-1.5 rounded-full px-3 text-[13px] font-bold transition-all active:scale-[0.98]",
                   isInRoute
                     ? "bg-secondary text-foreground hover:bg-secondary/80"
                     : "bg-primary text-primary-foreground hover:bg-primary/90"

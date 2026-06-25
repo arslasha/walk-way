@@ -81,7 +81,7 @@ export function SaveToCollectionButton({ placeId, className = "", onModalStateCh
         onClick={handleClick}
         disabled={isAutoSaving}
         title={isSaved ? "Изменить подборки" : "Сохранить"}
-        className={`flex items-center justify-center h-9 w-9 rounded-full border transition-all flex-shrink-0 ${
+        className={`flex items-center justify-center h-9 w-9 rounded-full border transition-all flex-shrink-0 active:scale-90 ${
           isSaved
             ? "border-accent bg-accent/10 text-accent"
             : "border-border bg-surface/80 text-muted-foreground hover:text-accent hover:border-accent/50"

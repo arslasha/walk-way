@@ -266,7 +266,7 @@ export default function ProfilePage() {
             {/* Edit Profile Button */}
             <button
               onClick={() => setIsEditModalOpen(true)}
-              className="flex items-center gap-2 rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-surface-raised hover:border-foreground/30 transition-all shadow-sm"
+              className="flex items-center gap-2 rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-surface-raised hover:border-foreground/30 transition-all shadow-sm active:scale-95"
             >
               <Edit3 className="h-4 w-4" />
               редактировать профиль
@@ -300,7 +300,7 @@ export default function ProfilePage() {
                         </p>
                         <button
                           onClick={() => setIs2FADisableOpen(true)}
-                          className="mt-3 text-xs font-semibold text-red-500 hover:underline hover:text-red-600 block"
+                          className="mt-3 text-xs font-semibold text-red-500 hover:underline hover:text-red-600 block active:opacity-70"
                         >
                           отключить защиту 2FA
                         </button>
@@ -318,7 +318,7 @@ export default function ProfilePage() {
                         </p>
                         <button
                           onClick={handleStart2FA}
-                          className="mt-3 text-xs font-semibold text-accent hover:underline hover:text-accent-hover block"
+                          className="mt-3 text-xs font-semibold text-accent hover:underline hover:text-accent-hover block active:opacity-70"
                         >
                           настроить двухфакторку
                         </button>
@@ -338,7 +338,7 @@ export default function ProfilePage() {
               <div className="flex gap-4 border-b border-border pb-4 mb-6">
                 <button
                   onClick={() => setActiveTab("folders")}
-                  className={`flex items-center gap-2 pb-2 text-sm font-bold tracking-wider uppercase border-b-2 transition-all ${
+                  className={`flex items-center gap-2 pb-2 text-sm font-bold tracking-wider uppercase border-b-2 transition-all active:scale-95 ${
                     activeTab === "folders"
                       ? "border-accent text-foreground"
                       : "border-transparent text-muted-foreground hover:text-foreground"
@@ -349,7 +349,7 @@ export default function ProfilePage() {
                 </button>
                 <button
                   onClick={() => setActiveTab("friends")}
-                  className={`flex items-center gap-2 pb-2 text-sm font-bold tracking-wider uppercase border-b-2 transition-all ${
+                  className={`flex items-center gap-2 pb-2 text-sm font-bold tracking-wider uppercase border-b-2 transition-all active:scale-95 ${
                     activeTab === "friends"
                       ? "border-accent text-foreground"
                       : "border-transparent text-muted-foreground hover:text-foreground"
@@ -411,10 +411,10 @@ export default function ProfilePage() {
                           </label>
                         </div>
                         <div className="flex gap-3">
-                          <button type="submit" disabled={collectionsLoading} className="flex-1 h-9 rounded-full bg-accent text-white text-xs font-bold hover:bg-accent-hover transition-all disabled:opacity-50">
+                          <button type="submit" disabled={collectionsLoading} className="flex-1 h-9 rounded-full bg-accent text-white text-xs font-bold hover:bg-accent-hover transition-all disabled:opacity-50 active:scale-95">
                             {collectionsLoading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "создать"}
                           </button>
-                          <button type="button" onClick={() => { setIsCreatingFolder(false); setNewFolderName(""); setNewFolderDesc(""); }} className="flex-1 h-9 rounded-full border border-border text-foreground text-xs font-bold hover:bg-surface-raised transition-all">
+                          <button type="button" onClick={() => { setIsCreatingFolder(false); setNewFolderName(""); setNewFolderDesc(""); }} className="flex-1 h-9 rounded-full border border-border text-foreground text-xs font-bold hover:bg-surface-raised transition-all active:scale-95">
                             отмена
                           </button>
                         </div>
@@ -422,7 +422,7 @@ export default function ProfilePage() {
                     ) : (
                       <button
                         onClick={() => setIsCreatingFolder(true)}
-                        className="flex w-full items-center gap-2 rounded-[28px] border border-dashed border-border px-5 py-4 text-sm font-semibold text-muted-foreground hover:border-accent hover:text-accent transition-all"
+                        className="flex w-full items-center gap-2 rounded-[28px] border border-dashed border-border px-5 py-4 text-sm font-semibold text-muted-foreground hover:border-accent hover:text-accent transition-all active:scale-[0.99]"
                       >
                         <Plus className="h-4 w-4" />
                         создать новую папку
@@ -483,7 +483,7 @@ export default function ProfilePage() {
                               ) : (
                                 <button
                                   onClick={() => setDeletingId(c.id)}
-                                  className="p-1.5 rounded-full text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors flex-shrink-0"
+                                  className="p-1.5 rounded-full text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all flex-shrink-0 active:scale-90"
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </button>
@@ -502,7 +502,7 @@ export default function ProfilePage() {
                                         const ok = await removePlaceFromCollection(c.id, p.id);
                                         if (ok) toast.success("Место удалено из папки");
                                       }}
-                                      className="text-muted-foreground hover:text-red-500 transition-colors flex-shrink-0"
+                                      className="text-muted-foreground hover:text-red-500 transition-colors flex-shrink-0 active:scale-90"
                                     >
                                       <X className="h-3 w-3" />
                                     </button>
@@ -526,7 +526,7 @@ export default function ProfilePage() {
                     </p>
                     <button
                       onClick={() => toast.info("Функционал друзей будет доступен в следующих фазах разработки")}
-                      className="mt-6 inline-flex items-center gap-1.5 rounded-full bg-accent px-5 py-2 text-xs font-bold text-white transition-all hover:bg-accent-hover"
+                      className="mt-6 inline-flex items-center gap-1.5 rounded-full bg-accent px-5 py-2 text-xs font-bold text-white transition-all hover:bg-accent-hover active:scale-95"
                     >
                       найти друзей
                       <ChevronRight className="h-3.5 w-3.5" />
@@ -547,7 +547,7 @@ export default function ProfilePage() {
             
             <button
               onClick={() => setIsEditModalOpen(false)}
-              className="absolute top-6 right-6 p-2 rounded-full border border-border hover:bg-surface-raised transition-colors"
+              className="absolute top-6 right-6 p-2 rounded-full border border-border hover:bg-surface-raised transition-all active:scale-90"
             >
               <X className="h-4 w-4" />
             </button>
@@ -623,7 +623,7 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-12 flex items-center justify-center rounded-[28px] bg-accent text-white font-semibold tracking-wide hover:bg-accent-hover transition-all disabled:opacity-50 mt-4"
+                className="w-full h-12 flex items-center justify-center rounded-[28px] bg-accent text-white font-semibold tracking-wide hover:bg-accent-hover transition-all disabled:opacity-50 mt-4 active:scale-[0.98]"
               >
                 {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "сохранить изменения"}
               </button>
@@ -642,7 +642,7 @@ export default function ProfilePage() {
                 setIs2FASetupOpen(false);
                 setShowBackupCodes(false);
               }}
-              className="absolute top-6 right-6 p-2 rounded-full border border-border hover:bg-surface-raised transition-colors"
+              className="absolute top-6 right-6 p-2 rounded-full border border-border hover:bg-surface-raised transition-all active:scale-90"
             >
               <X className="h-4 w-4" />
             </button>
@@ -701,7 +701,7 @@ export default function ProfilePage() {
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full h-12 flex items-center justify-center rounded-[28px] bg-accent text-white font-semibold hover:bg-accent-hover transition-all disabled:opacity-50"
+                      className="w-full h-12 flex items-center justify-center rounded-[28px] bg-accent text-white font-semibold hover:bg-accent-hover transition-all disabled:opacity-50 active:scale-[0.98]"
                     >
                       {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "активировать защиту"}
                     </button>
@@ -731,7 +731,7 @@ export default function ProfilePage() {
                   <div className="flex gap-4">
                     <button
                       onClick={copyBackupCodes}
-                      className="flex-1 h-12 flex items-center justify-center gap-2 rounded-[28px] border border-border bg-surface text-foreground font-semibold hover:bg-surface-raised transition-all"
+                      className="flex-1 h-12 flex items-center justify-center gap-2 rounded-[28px] border border-border bg-surface text-foreground font-semibold hover:bg-surface-raised transition-all active:scale-95"
                     >
                       {copiedCodes ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
                       {copiedCodes ? "скопировано" : "копировать все"}
@@ -742,7 +742,7 @@ export default function ProfilePage() {
                         setIs2FASetupOpen(false);
                         setShowBackupCodes(false);
                       }}
-                      className="flex-1 h-12 flex items-center justify-center rounded-[28px] bg-accent text-white font-semibold hover:bg-accent-hover transition-all"
+                      className="flex-1 h-12 flex items-center justify-center rounded-[28px] bg-accent text-white font-semibold hover:bg-accent-hover transition-all active:scale-95"
                     >
                       готово
                     </button>
@@ -761,7 +761,7 @@ export default function ProfilePage() {
             
             <button
               onClick={() => setIs2FADisableOpen(false)}
-              className="absolute top-6 right-6 p-2 rounded-full border border-border hover:bg-surface-raised transition-colors"
+              className="absolute top-6 right-6 p-2 rounded-full border border-border hover:bg-surface-raised transition-all active:scale-90"
             >
               <X className="h-4 w-4" />
             </button>
@@ -817,7 +817,7 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-12 flex items-center justify-center rounded-[28px] bg-red-500 text-white font-semibold hover:bg-red-600 transition-all disabled:opacity-50 mt-6"
+                className="w-full h-12 flex items-center justify-center rounded-[28px] bg-red-500 text-white font-semibold hover:bg-red-600 transition-all disabled:opacity-50 mt-6 active:scale-[0.98]"
               >
                 {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "отключить защиту"}
               </button>

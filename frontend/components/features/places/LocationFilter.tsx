@@ -52,7 +52,7 @@ export function LocationFilter() {
       <button
         onClick={toggleLocation}
         disabled={isLoading}
-        className={`chip whitespace-nowrap ${isActive ? "chip-active" : ""} ${
+        className={`chip whitespace-nowrap transition-transform active:scale-95 ${isActive ? "chip-active" : ""} ${
           isLoading ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >

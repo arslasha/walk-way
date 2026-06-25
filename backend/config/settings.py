@@ -96,16 +96,23 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': env('POSTGRES_DB', default='walkway_db'),
-        'USER': env('POSTGRES_USER', default='walkway_user'),
-        'PASSWORD': env('POSTGRES_PASSWORD', default='walkway_pass'),
-        'HOST': env('POSTGRES_HOST', default='db'),
-        'PORT': env('POSTGRES_PORT', default='5432'),
+if env('DATABASE_URL', default=''):
+    DATABASES = {
+        'default': env.db('DATABASE_URL')
     }
-}
+    DATABASES['default']['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
+            'NAME': env('POSTGRES_DB', default='walkway_db'),
+            'USER': env('POSTGRES_USER', default='walkway_user'),
+            'PASSWORD': env('POSTGRES_PASSWORD', default='walkway_pass'),
+            'HOST': env('POSTGRES_HOST', default='db'),
+            'PORT': env('POSTGRES_PORT', default='5432'),
+        }
+    }
+
 
 
 # Password validation

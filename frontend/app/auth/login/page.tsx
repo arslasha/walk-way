@@ -141,7 +141,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-4 flex items-center text-muted-foreground hover:text-foreground"
+                    className="absolute inset-y-0 right-4 flex items-center text-muted-foreground hover:text-foreground transition-transform active:scale-90"
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -151,7 +151,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="relative flex w-full h-14 items-center justify-center rounded-[28px] bg-accent text-white font-semibold tracking-wide transition-all hover:bg-accent-hover disabled:opacity-50 mt-8"
+                className="relative flex w-full h-14 items-center justify-center rounded-[28px] bg-accent text-white font-semibold tracking-wide transition-all hover:bg-accent-hover disabled:opacity-50 mt-8 active:scale-[0.98]"
               >
                 {isLoading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -162,7 +162,7 @@ export default function LoginPage() {
 
               <div className="pt-4 text-center text-sm text-muted-foreground">
                 Ещё нет аккаунта?{" "}
-                <Link href="/auth/register" className="font-semibold text-accent hover:underline">
+                <Link href="/auth/register" className="font-semibold text-accent hover:underline transition-opacity active:opacity-70">
                   Зарегистрироваться
                 </Link>
               </div>
@@ -194,7 +194,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="relative flex w-full h-14 items-center justify-center rounded-[28px] bg-accent text-white font-semibold tracking-wide transition-all hover:bg-accent-hover disabled:opacity-50 mt-4"
+                className="relative flex w-full h-14 items-center justify-center rounded-[28px] bg-accent text-white font-semibold tracking-wide transition-all hover:bg-accent-hover disabled:opacity-50 mt-4 active:scale-[0.98]"
               >
                 {isLoading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -207,7 +207,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => useAuthStore.setState({ twoFactorRequired: false, preAuthToken: null })}
-                  className="text-xs font-semibold tracking-wider text-muted-foreground uppercase hover:text-foreground hover:underline"
+                  className="text-xs font-semibold tracking-wider text-muted-foreground uppercase hover:text-foreground hover:underline transition-opacity active:opacity-70"
                 >
                   Вернуться к вводу пароля
                 </button>

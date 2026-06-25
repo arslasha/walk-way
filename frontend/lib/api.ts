@@ -50,7 +50,7 @@ export async function getTags(isVibe?: boolean): Promise<Tag[]> {
     url.searchParams.append("is_vibe", isVibe.toString());
   }
 
-  const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
+  const res = await fetch(url.toString(), { next: { revalidate: 0 } });
   if (!res.ok) {
     throw new Error("Failed to fetch tags");
   }

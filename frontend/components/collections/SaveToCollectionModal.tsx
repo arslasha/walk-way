@@ -129,7 +129,7 @@ export function SaveToCollectionModal({ placeId, onClose }: SaveToCollectionModa
           <h2 className="text-xl font-bold text-foreground">Сохранить в подборку</h2>
           <button
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-raised text-muted-foreground hover:bg-border transition-all"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-raised text-muted-foreground hover:bg-border transition-all active:scale-90"
             aria-label="Закрыть"
           >
             <X className="h-5 w-5" />
@@ -155,7 +155,7 @@ export function SaveToCollectionModal({ placeId, onClose }: SaveToCollectionModa
                   onClick={() => handleToggle(c.id)}
                   disabled={isPending}
                   className={cn(
-                    "flex w-full items-center gap-4 rounded-2xl p-4 text-left transition-all border",
+                    "flex w-full items-center gap-4 rounded-2xl p-4 text-left transition-all border active:scale-[0.98]",
                     isIn
                       ? "border-accent bg-accent/5"
                       : "border-border bg-surface hover:border-accent/30 hover:bg-surface-raised"
@@ -205,14 +205,14 @@ export function SaveToCollectionModal({ placeId, onClose }: SaveToCollectionModa
                   <button
                     type="button"
                     onClick={() => setIsCreating(false)}
-                    className="h-10 px-4 rounded-full text-sm font-semibold text-muted-foreground hover:bg-surface-raised transition-colors"
+                    className="h-10 px-4 rounded-full text-sm font-semibold text-muted-foreground hover:bg-surface-raised transition-all active:scale-95"
                   >
                     Отмена
                   </button>
                   <button
                     type="submit"
                     disabled={!newName.trim()}
-                    className="h-10 px-6 rounded-full bg-accent text-white text-sm font-semibold hover:bg-accent-hover disabled:opacity-50 transition-all"
+                    className="h-10 px-6 rounded-full bg-accent text-white text-sm font-semibold hover:bg-accent-hover disabled:opacity-50 transition-all active:scale-95"
                   >
                     Создать
                   </button>
@@ -221,7 +221,7 @@ export function SaveToCollectionModal({ placeId, onClose }: SaveToCollectionModa
             ) : (
               <button
                 onClick={() => setIsCreating(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border p-4 text-sm font-bold text-muted-foreground hover:border-accent hover:text-accent hover:bg-accent/5 transition-colors"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border p-4 text-sm font-bold text-muted-foreground hover:border-accent hover:text-accent hover:bg-accent/5 transition-all active:scale-[0.98]"
               >
                 <Plus className="h-5 w-5" />
                 Новая подборка
@@ -233,14 +233,14 @@ export function SaveToCollectionModal({ placeId, onClose }: SaveToCollectionModa
         <div className="shrink-0 p-4 border-t border-border bg-surface flex flex-col gap-2">
           <button
             onClick={onClose}
-            className="w-full h-12 rounded-full bg-foreground text-background font-bold text-base hover:opacity-90 transition-opacity"
+            className="w-full h-12 rounded-full bg-foreground text-background font-bold text-base hover:opacity-90 transition-all active:scale-[0.98]"
           >
             Готово
           </button>
           {collectionPlaceIds.size > 0 && (
             <button
               onClick={handleRemoveFromAll}
-              className="w-full h-12 rounded-full bg-transparent text-muted-foreground font-bold text-base hover:bg-surface-raised transition-colors"
+              className="w-full h-12 rounded-full bg-transparent text-muted-foreground font-bold text-base hover:bg-surface-raised transition-all active:scale-[0.98]"
             >
               Не добавлять
             </button>

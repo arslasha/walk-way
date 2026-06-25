@@ -145,7 +145,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-4 flex items-center text-muted-foreground hover:text-foreground"
+                  className="absolute inset-y-0 right-4 flex items-center text-muted-foreground hover:text-foreground transition-transform active:scale-90"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -174,7 +174,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="relative flex w-full h-14 items-center justify-center rounded-[28px] bg-accent text-white font-semibold tracking-wide transition-all hover:bg-accent-hover disabled:opacity-50 mt-6"
+              className="relative flex w-full h-14 items-center justify-center rounded-[28px] bg-accent text-white font-semibold tracking-wide transition-all hover:bg-accent-hover disabled:opacity-50 mt-6 active:scale-[0.98]"
             >
               {isLoading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -185,7 +185,7 @@ export default function RegisterPage() {
 
             <div className="pt-4 text-center text-sm text-muted-foreground">
               Уже есть аккаунт?{" "}
-              <Link href="/auth/login" className="font-semibold text-accent hover:underline">
+              <Link href="/auth/login" className="font-semibold text-accent hover:underline transition-opacity active:opacity-70">
                 Войти
               </Link>
             </div>

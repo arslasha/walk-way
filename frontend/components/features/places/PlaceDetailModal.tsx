@@ -69,7 +69,7 @@ export function PlaceDetailModal({ place, onClose }: PlaceDetailModalProps) {
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-all"
+          className="absolute right-4 top-4 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-all active:scale-90"
           aria-label="Закрыть"
         >
           <X className="h-4 w-4" />
@@ -184,7 +184,7 @@ export function PlaceDetailModal({ place, onClose }: PlaceDetailModalProps) {
           <button
             onClick={handleToggleRoute}
             className={cn(
-              "flex flex-1 h-11 items-center justify-center gap-2 rounded-full text-sm font-bold transition-colors",
+              "flex flex-1 h-11 items-center justify-center gap-2 rounded-full text-sm font-bold transition-all active:scale-[0.98]",
               isInRoute
                 ? "bg-secondary text-foreground hover:bg-secondary/80"
                 : "bg-accent text-white hover:bg-accent/90 shadow-lg shadow-accent/20"

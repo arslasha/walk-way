@@ -274,7 +274,7 @@ export default function MapPage() {
                               addPlace(place);
                               setActivePlaceId(null);
                             }}
-                            className="w-full mt-1 bg-accent hover:bg-accent/90 text-white text-[10px] font-bold px-2 py-1.5 rounded-full transition-colors"
+                            className="w-full mt-1 bg-accent hover:bg-accent/90 text-white text-[10px] font-bold px-2 py-1.5 rounded-full transition-all active:scale-[0.98] active:bg-accent/80"
                           >
                             Добавить в маршрут
                           </button>

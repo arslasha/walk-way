@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { PlaceFeature } from '@/types/place';
-import { getPlaces, calculateRoute, getPlacesAlongRoute } from '@/lib/api';
+import { getPlaces, calculateRoute, calculateLoopRoute, getPlacesAlongRoute } from '@/lib/api';
 
 function calculateSimulatedRouteMetrics(route: PlaceFeature[]) {
   if (route.length < 2) {
@@ -51,11 +51,14 @@ interface RouteState {
   alongRoutePlaces: PlaceFeature[];
   isCalculatingRoute: boolean;
   isFetchingAlongRoute: boolean;
+  isLoopRoute: boolean;
+  loopDurationMinutes: number;
   
   addPlace: (place: PlaceFeature) => void;
   removePlace: (placeId: number) => void;
   reorderPlaces: (newRoute: PlaceFeature[]) => void;
   clearRoute: () => void;
+  setLoopMode: (isLoop: boolean, durationMinutes?: number) => void;
   fetchRouteDetails: () => Promise<void>;
 }
 
@@ -70,6 +73,8 @@ export const useRouteStore = create<RouteState>()(
       alongRoutePlaces: [],
       isCalculatingRoute: false,
       isFetchingAlongRoute: false,
+      isLoopRoute: false,
+      loopDurationMinutes: 60, // default 1 hour
 
       addPlace: (place) => {
         set((state) => {
@@ -101,11 +106,20 @@ export const useRouteStore = create<RouteState>()(
           alongRoutePlaces: [],
           isCalculatingRoute: false,
           isFetchingAlongRoute: false,
+          // Loop mode persists, but route clears
         });
       },
 
+      setLoopMode: (isLoop, durationMinutes) => {
+        set((state) => ({
+          isLoopRoute: isLoop,
+          loopDurationMinutes: durationMinutes || state.loopDurationMinutes,
+        }));
+        get().fetchRouteDetails();
+      },
+
       fetchRouteDetails: async () => {
-        const { route } = get();
+        const { route, isLoopRoute, loopDurationMinutes } = get();
         
         if (route.length === 0) {
           set({
@@ -117,6 +131,40 @@ export const useRouteStore = create<RouteState>()(
             isCalculatingRoute: false,
             isFetchingAlongRoute: false,
           });
+          return;
+        }
+
+        // Loop Route Logic
+        if (isLoopRoute && route.length >= 1) {
+          set({ isCalculatingRoute: true, isFetchingAlongRoute: false });
+          try {
+            const firstPlace = route[0];
+            const [lon, lat] = firstPlace.geometry.coordinates;
+            // estimate distance in meters: 4.8 km/h speed
+            const targetDistanceMeters = (loopDurationMinutes / 60) * 4800;
+            
+            const loopData = await calculateLoopRoute({
+              startCoords: [lon, lat],
+              distance: targetDistanceMeters,
+            });
+
+            // Set the new looped route, preserving the first place but appending the generated ones
+            // ORS loop returns multiple places, we just display them all as part of the route.
+            const newRoute = [firstPlace, ...loopData.places];
+
+            set({
+              route: newRoute,
+              routeGeometry: loopData.route.geometry,
+              distance: parseFloat((loopData.route.distance / 1000).toFixed(1)),
+              duration: Math.round(loopData.route.duration / 60),
+              steps: Math.round((loopData.route.distance / 1000) * 1350),
+              isCalculatingRoute: false,
+              alongRoutePlaces: [], // along-route logic typically not used for loops right away
+            });
+          } catch (error) {
+            console.error("Error calculating loop route:", error);
+            set({ isCalculatingRoute: false });
+          }
           return;
         }
 

@@ -17,7 +17,7 @@ export function VibeChipsSection() {
           <button
             key={value}
             onClick={() => setActiveVibe(value)}
-            className={cn("chip", activeVibe === value && "chip-active")}
+            className={cn("chip transition-all active:scale-95", activeVibe === value && "chip-active")}
           >
             {label}
           </button>

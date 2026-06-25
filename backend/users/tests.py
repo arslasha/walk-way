@@ -278,3 +278,150 @@ class AuthAndProfileTests(APITestCase):
         self.assertFalse(profile.is_2fa_enabled)
         self.assertIsNone(profile.otp_secret)
         self.assertEqual(len(profile.backup_codes), 0)
+
+
+class FriendAndSocialTests(APITestCase):
+
+    def setUp(self):
+        self.friends_list_url = '/api/v1/friends/'
+        self.friends_requests_url = '/api/v1/friends/requests/'
+        self.send_request_url = '/api/v1/friends/request/'
+        self.respond_request_url = '/api/v1/friends/respond/'
+        self.block_url = '/api/v1/friends/block/'
+        self.search_url = '/api/v1/profiles/search/'
+
+        # User A
+        self.user_a = User.objects.create_user(username='user_a@example.com', email='user_a@example.com', password='password123')
+        self.profile_a = UserProfile.objects.create(user=self.user_a, nickname='AliceKey')
+
+        # User B
+        self.user_b = User.objects.create_user(username='user_b@example.com', email='user_b@example.com', password='password123')
+        self.profile_b = UserProfile.objects.create(user=self.user_b, nickname='BobBuilder')
+
+        # User C
+        self.user_c = User.objects.create_user(username='user_c@example.com', email='user_c@example.com', password='password123')
+        self.profile_c = UserProfile.objects.create(user=self.user_c, nickname='CharlieChaplin')
+
+        # Auth headers
+        self.tokens_a = get_tokens_for_user(self.user_a)
+        self.tokens_b = get_tokens_for_user(self.user_b)
+
+    def test_send_friend_request_success(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.tokens_a['access'])
+        response = self.client.post(self.send_request_url, {'to_user_id': self.user_b.id})
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['status'], 'PENDING')
+
+        # Check in DB
+        from .models import Friendship
+        self.assertTrue(Friendship.objects.filter(user_from=self.user_a, user_to=self.user_b, status='PENDING').exists())
+
+    def test_send_friend_request_to_self(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.tokens_a['access'])
+        response = self.client.post(self.send_request_url, {'to_user_id': self.user_a.id})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_send_friend_request_already_friends(self):
+        from .models import Friendship
+        Friendship.objects.create(user_from=self.user_a, user_to=self.user_b, status='ACCEPTED')
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.tokens_a['access'])
+        response = self.client.post(self.send_request_url, {'to_user_id': self.user_b.id})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_respond_friend_request_accept(self):
+        from .models import Friendship
+        req = Friendship.objects.create(user_from=self.user_a, user_to=self.user_b, status='PENDING')
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.tokens_b['access'])
+        response = self.client.post(self.respond_request_url, {'friendship_id': req.id, 'action': 'accept'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['status'], 'ACCEPTED')
+
+        # Verify reciprocity in DB / status update
+        self.assertTrue(Friendship.objects.filter(user_from=self.user_a, user_to=self.user_b, status='ACCEPTED').exists())
+
+    def test_respond_friend_request_decline(self):
+        from .models import Friendship
+        req = Friendship.objects.create(user_from=self.user_a, user_to=self.user_b, status='PENDING')
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.tokens_b['access'])
+        response = self.client.post(self.respond_request_url, {'friendship_id': req.id, 'action': 'decline'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(Friendship.objects.filter(id=req.id).exists())
+
+    def test_block_user_success(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.tokens_a['access'])
+        response = self.client.post(self.block_url, {'to_user_id': self.user_b.id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['status'], 'BLOCKED')
+
+        # Try to send friend request after block
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.tokens_b['access'])
+        response = self.client.post(self.send_request_url, {'to_user_id': self.user_a.id})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_search_profiles(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.tokens_a['access'])
+        
+        # Search for Bob
+        response = self.client.get(self.search_url, {'q': 'Bob'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['nickname'], 'BobBuilder')
+        self.assertIsNone(response.data[0]['friendship_status'])
+
+        # Add bob as pending friend and search again
+        from .models import Friendship
+        Friendship.objects.create(user_from=self.user_a, user_to=self.user_b, status='PENDING')
+
+        response = self.client.get(self.search_url, {'q': 'Bob'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]['friendship_status'], 'pending_sent')
+
+    def test_public_profile_detail(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.tokens_a['access'])
+        url = f'/api/v1/profiles/BobBuilder/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['nickname'], 'BobBuilder')
+        self.assertIsNone(response.data['friendship_status'])
+
+    def test_delete_friendship_unfriend(self):
+        from .models import Friendship
+        fs = Friendship.objects.create(user_from=self.user_a, user_to=self.user_b, status='ACCEPTED')
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.tokens_a['access'])
+        delete_url = f'/api/v1/friends/{fs.id}/'
+        response = self.client.delete(delete_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(Friendship.objects.filter(id=fs.id).exists())
+
+    def test_delete_friendship_cancel_pending(self):
+        from .models import Friendship
+        fs = Friendship.objects.create(user_from=self.user_a, user_to=self.user_b, status='PENDING')
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.tokens_a['access'])
+        delete_url = f'/api/v1/friends/{fs.id}/'
+        response = self.client.delete(delete_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(Friendship.objects.filter(id=fs.id).exists())
+
+    def test_delete_friendship_unblock(self):
+        from .models import Friendship
+        fs = Friendship.objects.create(user_from=self.user_a, user_to=self.user_b, status='BLOCKED')
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.tokens_a['access'])
+        delete_url = f'/api/v1/friends/{fs.id}/'
+        response = self.client.delete(delete_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(Friendship.objects.filter(id=fs.id).exists())
+
+    def test_delete_friendship_unauthorized(self):
+        from .models import Friendship
+        fs = Friendship.objects.create(user_from=self.user_b, user_to=self.user_c, status='ACCEPTED')
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.tokens_a['access'])
+        delete_url = f'/api/v1/friends/{fs.id}/'
+        response = self.client.delete(delete_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertTrue(Friendship.objects.filter(id=fs.id).exists())
+
+
+

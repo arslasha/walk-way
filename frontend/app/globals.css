@@ -146,8 +146,16 @@
 }
 
 @layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   .ww-container {
-    @apply mx-auto w-full max-w-[1280px] px-16;
+    @apply mx-auto w-full max-w-[1280px] px-4 md:px-16;
   }
 
   .text-display-hero {
@@ -211,9 +219,9 @@
   }
 
   .chip {
-    @apply inline-flex items-center rounded-full border border-ww-border px-4 py-1.5 text-sm font-medium transition-all duration-200 hover:border-ww-ink/30 cursor-pointer;
+    @apply inline-flex items-center rounded-full border border-border px-4 py-1.5 text-sm font-medium transition-all duration-200 hover:border-foreground/30 cursor-pointer;
   }
   .chip-active {
-    @apply bg-ww-ink text-white border-ww-ink;
+    @apply bg-accent text-accent-foreground border-accent;
   }
 }

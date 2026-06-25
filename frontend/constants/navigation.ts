@@ -6,7 +6,6 @@ export interface NavLink {
 export const NAV_LINKS: NavLink[] = [
   { href: "/explore", label: "Места" },
   { href: "/map",     label: "Карта" },
-  { href: "/saved",   label: "Сохранённые" },
 ];
 
 export const FOOTER_LINKS = {

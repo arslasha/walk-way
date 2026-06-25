@@ -8,6 +8,14 @@ from .views import (
     TwoFactorEnableView,
     TwoFactorConfirmView,
     TwoFactorDisableView,
+    FriendRequestView,
+    FriendRespondView,
+    FriendBlockView,
+    FriendsListView,
+    FriendRequestsView,
+    FriendshipDeleteView,
+    PublicProfileDetailView,
+    PublicProfileSearchView,
 )
 
 urlpatterns = [
@@ -23,4 +31,17 @@ urlpatterns = [
     path('profiles/me/2fa/enable/', TwoFactorEnableView.as_view(), name='profile-2fa-enable'),
     path('profiles/me/2fa/confirm/', TwoFactorConfirmView.as_view(), name='profile-2fa-confirm'),
     path('profiles/me/2fa/disable/', TwoFactorDisableView.as_view(), name='profile-2fa-disable'),
+
+    # Friend & Social Endpoints
+    path('friends/', FriendsListView.as_view(), name='friends-list'),
+    path('friends/requests/', FriendRequestsView.as_view(), name='friends-requests'),
+    path('friends/request/', FriendRequestView.as_view(), name='friends-request-send'),
+    path('friends/respond/', FriendRespondView.as_view(), name='friends-request-respond'),
+    path('friends/block/', FriendBlockView.as_view(), name='friends-block'),
+    path('friends/<int:pk>/', FriendshipDeleteView.as_view(), name='friends-delete'),
+
+    # Public profiles
+    path('profiles/search/', PublicProfileSearchView.as_view(), name='profiles-search'),
+    path('profiles/<str:nickname>/', PublicProfileDetailView.as_view(), name='profile-detail'),
 ]
+

@@ -10,6 +10,7 @@ import { useTheme } from "next-themes";
 import { RouteBottomSheet } from "@/components/features/route/RouteBottomSheet";
 import { Navbar } from "@/components/layout/Navbar";
 import { PlaceFeature } from "@/types/place";
+import { Loader } from "@/components/ui/Loader";
 
 const MOSCOW_CENTER = {
   longitude: 37.6173,
@@ -38,31 +39,40 @@ export default function MapPage() {
     setMounted(true);
   }, []);
 
-  // Reset fit bounds when route changes so we re-fit for the new route
+  // Reset fit bounds when route or route geometry changes so we re-fit for the new path
   useEffect(() => {
     setHasFitBounds(false);
-  }, [route]);
+  }, [route, routeGeometry]);
 
   // Calculate bounds based on route
   useEffect(() => {
     if (!mapRef.current || route.length === 0 || !isMapLoaded || hasFitBounds) return;
 
     const bounds = new maplibregl.LngLatBounds();
-    route.forEach((place) => {
-      bounds.extend([place.geometry.coordinates[0], place.geometry.coordinates[1]]);
-    });
+    
+    // Frame the actual route geometry if available for a perfect fit
+    if (routeGeometry && routeGeometry.coordinates && routeGeometry.coordinates.length > 0) {
+      routeGeometry.coordinates.forEach((coord: [number, number]) => {
+        bounds.extend(coord);
+      });
+    } else {
+      route.forEach((place) => {
+        bounds.extend([place.geometry.coordinates[0], place.geometry.coordinates[1]]);
+      });
+    }
 
     if (!bounds.isEmpty()) {
       const isDesktop = window.innerWidth >= 768;
       mapRef.current.fitBounds(bounds, {
         padding: {
           top: 80,
-          bottom: 80,
-          left: isDesktop ? 420 : 60, // Shift center to the right to avoid overlapping with desktop sidebar
+          bottom: window.innerHeight * 0.4, // give space for bottom sheet on mobile
+          left: isDesktop ? 420 : 60,
           right: 60,
         },
         maxZoom: 16,
-        duration: 1000,
+        duration: 1200,
+        essential: true,
       });
       setHasFitBounds(true);
     }
@@ -102,11 +112,8 @@ export default function MapPage() {
 
       {/* Preloader */}
       {(!mounted || !isMapLoaded) && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-muted border-t-accent mb-4"></div>
-          <p className="text-body-md font-medium text-muted-foreground animate-pulse">
-            Загрузка карты...
-          </p>
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-background">
+          <Loader message="Загрузка карты..." size="lg" />
         </div>
       )}
 
@@ -187,14 +194,29 @@ export default function MapPage() {
                 {/* Tooltip on hover or active */}
                 <div 
                   className={cn(
-                    "absolute bottom-full mb-2 left-1/2 -translate-x-1/2 transition-all duration-300 pointer-events-none whitespace-nowrap z-20",
+                    "absolute bottom-full mb-3 left-1/2 -translate-x-1/2 transition-[opacity,transform] duration-200 pointer-events-none z-20 w-[220px] [backface-visibility:hidden] [transform-style:preserve-3d]",
                     activePlaceId === place.id
-                      ? "opacity-100 scale-100"
-                      : "opacity-0 group-hover:opacity-100 scale-95"
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"
                   )}
                 >
-                  <div className="bg-surface text-text-primary text-xs font-bold px-3 py-1.5 rounded-full shadow-lg border border-border">
-                    {place.properties.title}
+                  <div className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-2xl border border-zinc-200 dark:border-zinc-700 rounded-2xl p-2 flex items-start gap-2">
+                    {place.properties.photos && place.properties.photos.length > 0 ? (
+                      <img
+                        src={place.properties.photos[0]}
+                        alt={place.properties.title}
+                        className="h-12 w-12 rounded-xl object-cover shrink-0"
+                        style={{ imageRendering: "auto" }}
+                      />
+                    ) : (
+                      <div className="h-12 w-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 shrink-0" />
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-bold leading-tight line-clamp-1">{place.properties.title}</p>
+                      {place.properties.description && (
+                        <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-2 leading-snug">{place.properties.description}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -227,21 +249,36 @@ export default function MapPage() {
                     )}
                   />
                   
-                  {/* Popup/tooltip showing title and an Add button */}
+                  {/* Popup: photo, title, description + Add button */}
                   {activePlaceId === place.id && (
-                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
-                      <div className="bg-surface text-text-primary text-xs font-semibold p-2.5 rounded-2xl shadow-xl border border-border flex flex-col items-center gap-1.5 min-w-[140px]">
-                        <div className="text-center font-bold leading-tight">{place.properties.title}</div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            addPlace(place);
-                            setActivePlaceId(null);
-                          }}
-                          className="bg-accent hover:bg-accent-hover text-white text-[10px] font-bold px-2 py-1 rounded-full w-full transition-colors"
-                        >
-                          Добавить
-                        </button>
+                    <div
+                      className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-30 pointer-events-auto w-[240px] animate-in fade-in slide-in-from-bottom-1 duration-150"
+                      style={{ willChange: "transform" }}
+                    >
+                      <div className="bg-white dark:bg-zinc-900 shadow-2xl border border-zinc-200 dark:border-zinc-700 rounded-2xl overflow-hidden">
+                        {place.properties.photos && place.properties.photos.length > 0 && (
+                          <img
+                            src={place.properties.photos[0]}
+                            alt={place.properties.title}
+                            className="w-full h-[100px] object-cover"
+                          />
+                        )}
+                        <div className="p-2.5 space-y-1.5">
+                          <p className="text-[12px] font-bold text-zinc-900 dark:text-zinc-100 line-clamp-1">{place.properties.title}</p>
+                          {place.properties.description && (
+                            <p className="text-[10px] text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-snug">{place.properties.description}</p>
+                          )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addPlace(place);
+                              setActivePlaceId(null);
+                            }}
+                            className="w-full mt-1 bg-accent hover:bg-accent/90 text-white text-[10px] font-bold px-2 py-1.5 rounded-full transition-all active:scale-[0.98] active:bg-accent/80"
+                          >
+                            Добавить в маршрут
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}

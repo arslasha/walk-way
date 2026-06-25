@@ -1,4 +1,4 @@
-import { PlaceFeatureCollection, Category, Tag, PlaceFilters } from "@/types/place";
+import { PlaceFeatureCollection, PlaceFeature, Category, Tag, PlaceFilters } from "@/types/place";
 
 const getApiBaseUrl = () => {
   if (typeof window === "undefined") {
@@ -24,6 +24,7 @@ export async function getPlaces(filters?: PlaceFilters): Promise<PlaceFeatureCol
     if (filters.lat) url.searchParams.append("lat", filters.lat.toString());
     if (filters.lon) url.searchParams.append("lon", filters.lon.toString());
     if (filters.radius) url.searchParams.append("radius", filters.radius.toString());
+    if (filters.page) url.searchParams.append("page", filters.page.toString());
   }
 
   const res = await fetch(url.toString(), { next: { revalidate: 60 } }); // Cache for 60 seconds
@@ -49,7 +50,7 @@ export async function getTags(isVibe?: boolean): Promise<Tag[]> {
     url.searchParams.append("is_vibe", isVibe.toString());
   }
 
-  const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
+  const res = await fetch(url.toString(), { next: { revalidate: 0 } });
   if (!res.ok) {
     throw new Error("Failed to fetch tags");
   }
@@ -69,6 +70,37 @@ export async function calculateRoute(placeIds: number[]): Promise<{ geometry: an
     throw new Error("Failed to calculate route");
   }
   return res.json();
+}
+
+export async function calculateLoopRoute(options: { 
+  startCoords: [number, number], 
+  distance: number, 
+  vibes?: string[], 
+  category?: string 
+}): Promise<{ route: { geometry: any; distance: number; duration: number }, places: PlaceFeature[] }> {
+  const res = await fetch(`${API_BASE_URL}/routes/calculate/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ 
+      is_loop: true, 
+      start_coords: options.startCoords,
+      distance: options.distance,
+      vibes: options.vibes || [],
+      category: options.category
+    }),
+  });
+  if (!res.ok) {
+    throw new Error("Failed to calculate loop route");
+  }
+  const data = await res.json();
+  const placesArray = Array.isArray(data.places) ? data.places : (data.places?.features || []);
+  
+  return {
+    ...data,
+    places: placesArray
+  };
 }
 
 export async function getPlacesAlongRoute(

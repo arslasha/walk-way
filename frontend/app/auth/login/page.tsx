@@ -75,17 +75,17 @@ export default function LoginPage() {
         <div className="pointer-events-none absolute -right-40 -bottom-40 h-[600px] w-[600px] rounded-full bg-accent/5 blur-[120px]" />
 
         <div className="relative w-full max-w-[480px] overflow-hidden rounded-[40px] border border-border bg-surface/60 p-8 shadow-2xl backdrop-blur-xl md:p-12 transition-all">
-          
+
           {/* Logo / Brand subtitle */}
           <div className="mb-8 text-center">
             <span className="font-heading text-xs font-bold tracking-[0.2em] text-accent uppercase">
               walk-way
             </span>
             <h1 className="mt-2 font-heading text-[48px] font-extrabold leading-[1.0] tracking-tight text-foreground lowercase">
-              {twoFactorRequired ? "защита" : "войти"}
+              {twoFactorRequired ? "введите код" : "войти"}
             </h1>
             <p className="mt-3 text-sm text-muted-foreground">
-              {twoFactorRequired 
+              {twoFactorRequired
                 ? "введите 6-значный одноразовый код или резервный код"
                 : "городской гид по вайбу ждёт вас"
               }
@@ -141,7 +141,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-4 flex items-center text-muted-foreground hover:text-foreground"
+                    className="absolute inset-y-0 right-4 flex items-center text-muted-foreground hover:text-foreground transition-transform active:scale-90"
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -151,7 +151,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="relative flex w-full h-14 items-center justify-center rounded-[28px] bg-accent text-white font-semibold tracking-wide transition-all hover:bg-accent-hover disabled:opacity-50 mt-8"
+                className="relative flex w-full h-14 items-center justify-center rounded-[28px] bg-accent text-white font-semibold tracking-wide transition-all hover:bg-accent-hover disabled:opacity-50 mt-8 active:scale-[0.98]"
               >
                 {isLoading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -162,7 +162,7 @@ export default function LoginPage() {
 
               <div className="pt-4 text-center text-sm text-muted-foreground">
                 Ещё нет аккаунта?{" "}
-                <Link href="/auth/register" className="font-semibold text-accent hover:underline">
+                <Link href="/auth/register" className="font-semibold text-accent hover:underline transition-opacity active:opacity-70">
                   Зарегистрироваться
                 </Link>
               </div>
@@ -171,7 +171,7 @@ export default function LoginPage() {
             /* OTP Form */
             <form onSubmit={handleOtpSubmit} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase pl-3">
+                <label className="block text-center text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                   код подтверждения 2FA
                 </label>
                 <div className="relative">
@@ -184,7 +184,7 @@ export default function LoginPage() {
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value)}
                     placeholder="000000"
-                    className="w-full h-14 pl-12 pr-4 rounded-[28px] border border-border bg-surface/80 text-foreground placeholder:text-muted-foreground/60 focus:border-accent focus:outline-none transition-all tracking-[0.2em] font-mono text-center text-lg"
+                    className="w-full h-14 px-12 rounded-[28px] border border-border bg-surface/80 text-foreground placeholder:text-muted-foreground/60 focus:border-accent focus:outline-none transition-all tracking-[0.2em] font-mono text-center text-lg"
                     required
                     autoFocus
                   />
@@ -194,7 +194,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="relative flex w-full h-14 items-center justify-center rounded-[28px] bg-accent text-white font-semibold tracking-wide transition-all hover:bg-accent-hover disabled:opacity-50 mt-4"
+                className="relative flex w-full h-14 items-center justify-center rounded-[28px] bg-accent text-white font-semibold tracking-wide transition-all hover:bg-accent-hover disabled:opacity-50 mt-4 active:scale-[0.98]"
               >
                 {isLoading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -207,7 +207,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => useAuthStore.setState({ twoFactorRequired: false, preAuthToken: null })}
-                  className="text-xs font-semibold tracking-wider text-muted-foreground uppercase hover:text-foreground hover:underline"
+                  className="text-xs font-semibold tracking-wider text-muted-foreground uppercase hover:text-foreground hover:underline transition-opacity active:opacity-70"
                 >
                   Вернуться к вводу пароля
                 </button>

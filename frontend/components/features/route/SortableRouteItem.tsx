@@ -39,7 +39,7 @@ export function SortableRouteItem({ place, index, onRemove, onClick, isActive }:
         isDragging && "border-primary shadow-md",
         !isDragging && isActive && "border-accent bg-accent/[0.04] ring-1 ring-accent",
         !isDragging && !isActive && "border-border",
-        onClick && "cursor-pointer hover:border-accent/40"
+        onClick && "cursor-pointer hover:border-accent/40 active:scale-[0.99]"
       )}
       onClick={(e) => {
         const target = e.target as HTMLElement;
@@ -70,7 +70,7 @@ export function SortableRouteItem({ place, index, onRemove, onClick, isActive }:
       <button 
         type="button"
         onClick={() => onRemove(place.id)}
-        className="remove-btn p-2 text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-secondary"
+        className="remove-btn p-2 text-muted-foreground hover:text-foreground transition-all rounded-full hover:bg-secondary active:scale-90"
       >
         <X className="h-4 w-4" />
       </button>

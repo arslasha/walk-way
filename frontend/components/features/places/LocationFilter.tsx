@@ -48,11 +48,11 @@ export function LocationFilter() {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 shrink-0">
       <button
         onClick={toggleLocation}
         disabled={isLoading}
-        className={`chip whitespace-nowrap ${isActive ? "chip-active" : ""} ${
+        className={`chip whitespace-nowrap transition-transform active:scale-95 ${isActive ? "chip-active" : ""} ${
           isLoading ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >

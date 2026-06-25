@@ -39,6 +39,14 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
   - Integrated `django-cors-headers` package and middleware to solve cross-origin blocking on route calculations.
   - Resolved `500 Internal Server Error` on Tag and Category viewsets by disabling Global GeoJson Pagination for standard non-spatial endpoints.
   - Fixed MapLibre GL polyline route layers disappearing during theme switching by dynamically keying the `<Source>` layer with the `resolvedTheme` state, forcing clean reactive remounting on style reload.
+- [x] **Frontend UX/UI Improvements (Task 020):**
+  - Upgraded MapLibre tooltips to display place photos and addresses.
+  - Cleaned up Header Navigation by removing redundant "Sign Up" and "Saved" items.
+  - Implemented a unified, text-customizable `Loader` component.
+  - Created animated Place Detail modal dialog with quick routing/saving actions.
+  - Configured `Toaster` component for auto-dismissal.
+  - Added confirmation interceptor on route clearing.
+  - Improved horizontal vibe tags scroll container layout and styling for dark mode.
 
 ### Next Steps (To-Do)
 - [x] **UI/UX Polish:** Implement Loading Skeletons for the feed, proper Empty States for filtered results, and Toast notifications for geolocation errors.
@@ -54,10 +62,12 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 - [x] **Task 008:** MapLibre Integration & Route Visualization.
 - [x] **Task 009:** Map Bottom Sheet & Interactive UX (Vaul, responsive multi-snap drawer, quick-add recommendations, map-marker synchronization).
 - [x] **Task 010:** Backend Routing API & "Along the Way" Spatial Queries.
-- [ ] **Task 011:** Frontend Routing Polish & Loop Routes (Круговые маршруты).
-- [ ] **Task 012:** Backend Advanced Filters (Time, Weather, Budget) & Loop Logic.
+- [x] **Task 011:** Frontend Routing Polish & Loop Routes (Круговые маршруты).
+- [x] **Task 012:** Backend Advanced Filters (Time, Weather, Budget) & Loop Logic.
 - [x] **Task 013:** Fix Route Rendering & Client-Side CORS Issues (django-cors-headers, MapLibre layer fixes, tag viewset pagination).
 - [x] **Task 014:** QA Routing & Spatial API Auto-tests (PyTest backend mocks, Zustand store unit tests, map/bottom-sheet integration).
+- [x] **Task 020:** Frontend UX/UI Improvements & Bug Fixes (Map tooltips, header cleanup, unified loader, place modals, toast fixes, tag scroll).
+- [x] **Task 021:** Backend Data Ingestion Scale-up (Scale database with 1000+ places in Moscow via KudaGo API pagination, bulk creation, limit argument, handling API rate limits and categories).
 
 ### Backlog
 - [ ] **Saved & Shared Routes:** Moving towards phase 3, but preparing route models on backend.
@@ -68,9 +78,11 @@ Walk-Way is a geo-social web application designed for finding places (cafes, par
 ### Current Tasks
 - [x] **Task 015:** JWT Authentication, Registration & Optional 2FA (Backend).
 - [x] **Task 016:** Auth Forms, User Dashboard & Profile Editing UI (Frontend).
-- [ ] **Task 017:** Personal Folders & Place Collections (Backend & Frontend). ← IN PROGRESS
-- [ ] **Task 018:** Social Graph, User Search & Friend Profiles (Backend & Frontend).
-- [ ] **Task 019:** QA: Security, Accounts, Collections & Social API Auto-tests.
+- [x] **Task 017:** Personal Folders & Place Collections (Backend & Frontend).
+- [x] **Task 018:** Social Graph, User Search & Friend Profiles (Backend & Frontend).
+- [x] **Task 019:** QA: Security, Accounts, Collections & Social API Auto-tests.
+- [x] **Task 022:** Frontend Favorites & Collections Modal UX (Redesign place favorites flow to use a custom modal matching the size of the place details modal, support auto-saving to default 'Favorites' folder, allow changing folders for already saved places, and implement modal stacking/temporary hiding of the parent details modal).
+- [x] **Task 023:** Frontend Infinite Scroll for Explore Feed (Implement infinite scroll pagination on the /explore page using IntersectionObserver or a custom scroll handler. Adapt the `getPlaces` fetch wrapper to support the `page` query parameter, handle the paginated GeoJSON `FeatureCollection` format on the frontend, and add a loading spinner or skeleton at the bottom of the feed for seamless loading of Moscow's 800+ places).
 
 ### Backlog & Future Tasks
 - [ ] **Saved & Shared Routes:** Generate unique URLs to share custom walking routes with friends or partners.

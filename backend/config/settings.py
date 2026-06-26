@@ -101,6 +101,7 @@ if env('DATABASE_URL', default=''):
         'default': env.db('DATABASE_URL')
     }
     DATABASES['default']['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
+    DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
 else:
     DATABASES = {
         'default': {

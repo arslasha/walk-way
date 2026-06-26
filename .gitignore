@@ -21,5 +21,6 @@ dist/
 *.swp
 *.swo
 
-# Media
 backend/media/
+backend/staticfiles/
+

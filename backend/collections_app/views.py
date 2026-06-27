@@ -46,9 +46,10 @@ class CollectionListCreateView(generics.ListCreateAPIView):
         serializer.save(owner=self.request.user)
 
 
-class CollectionDetailView(generics.RetrieveDestroyAPIView):
+class CollectionDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     GET    /api/v1/collections/{id}/   → detail with places list
+    PATCH  /api/v1/collections/{id}/   → update (owner only)
     DELETE /api/v1/collections/{id}/   → delete (owner only)
     """
     queryset = Collection.objects.prefetch_related("places").all()

@@ -3,21 +3,29 @@
 import { useState } from "react";
 import type { PlaceFeature } from "@/types/place";
 import { useRouteStore } from "@/store/routeStore";
-import { Plus, Check } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
+import { Plus, Check, Edit3, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SaveToCollectionButton } from "@/components/collections/SaveToCollectionButton";
 import { PlaceDetailModal } from "./PlaceDetailModal";
+import { EditPlaceModal } from "./EditPlaceModal";
 import { ImageWithLoader } from "@/components/ui/ImageWithLoader";
+import { deletePlace } from "@/lib/api";
+import { toast } from "sonner";
 
 interface PlaceCardProps {
   place: PlaceFeature;
+  onUpdate?: (updatedPlace: PlaceFeature) => void;
+  onDelete?: (id: number) => void;
 }
 
-export function PlaceCard({ place }: PlaceCardProps) {
+export function PlaceCard({ place, onUpdate, onDelete }: PlaceCardProps) {
   const p = place.properties;
   const vibes = p.tags?.filter((t) => t.is_vibe).map((t) => t.name) || [];
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
+  const { user } = useAuthStore();
   const { route, addPlace, removePlace } = useRouteStore();
   const isInRoute = route.some((r) => r.id === place.id);
 
@@ -28,6 +36,10 @@ export function PlaceCard({ place }: PlaceCardProps) {
     } else {
       addPlace(place);
     }
+  };
+
+  const handlePlaceUpdate = (updatedPlace: PlaceFeature) => {
+    if (onUpdate) onUpdate(updatedPlace);
   };
 
   return (
@@ -70,11 +82,48 @@ export function PlaceCard({ place }: PlaceCardProps) {
           <div className="flex items-center justify-between mt-auto pt-3 gap-2">
             <span className="text-caption text-muted-foreground">~ 1 ч.</span>
             <div
-              className="flex items-center gap-2"
+              className="flex items-center gap-1.5"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Bookmark — save to personal collection */}
               <SaveToCollectionButton placeId={place.id as number} />
+              
+              {/* Admin Actions */}
+              {user?.is_staff && (
+                <>
+                  <button
+                    onClick={() => setIsEditOpen(true)}
+                    className="p-1.5 rounded-full text-muted-foreground hover:text-accent hover:bg-accent/10 transition-all active:scale-90"
+                    title="Редактировать"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (window.confirm(`Вы уверены, что хотите удалить место "${p.title}"?`)) {
+                        try {
+                          const ok = await deletePlace(place.id);
+                          if (ok) {
+                            toast.success("Место удалено");
+                            // Remove from active route too
+                            removePlace(place.id);
+                            onDelete?.(place.id);
+                          } else {
+                            toast.error("Не удалось удалить место");
+                          }
+                        } catch (err) {
+                          toast.error("Ошибка при удалении");
+                        }
+                      }
+                    }}
+                    className="p-1.5 rounded-full text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-90"
+                    title="Удалить"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </>
+              )}
+
               <button
                 onClick={toggleRoute}
                 className={cn(
@@ -103,6 +152,14 @@ export function PlaceCard({ place }: PlaceCardProps) {
 
       {isModalOpen && (
         <PlaceDetailModal place={place} onClose={() => setIsModalOpen(false)} />
+      )}
+
+      {isEditOpen && (
+        <EditPlaceModal
+          place={place}
+          onClose={() => setIsEditOpen(false)}
+          onUpdate={handlePlaceUpdate}
+        />
       )}
     </>
   );

@@ -28,11 +28,16 @@ if os.path.exists(env_file):
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('DJANGO_SECRET_KEY', default='unsafe-secret-key')
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DJANGO_DEBUG', default=True)
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = env('DJANGO_SECRET_KEY', default='')
+if not SECRET_KEY:
+    if not DEBUG:
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured("DJANGO_SECRET_KEY environment variable is required in production.")
+    SECRET_KEY = 'unsafe-secret-key-for-dev-only'
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
 
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[])

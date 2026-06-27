@@ -5,12 +5,16 @@ import Map, { Marker, NavigationControl, MapRef, Source, Layer } from "react-map
 import "maplibre-gl/dist/maplibre-gl.css";
 import maplibregl from "maplibre-gl";
 import { useRouteStore } from "@/store/routeStore";
+import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { RouteBottomSheet } from "@/components/features/route/RouteBottomSheet";
 import { Navbar } from "@/components/layout/Navbar";
 import { PlaceFeature } from "@/types/place";
 import { Loader } from "@/components/ui/Loader";
+import { deletePlace } from "@/lib/api";
+import { toast } from "sonner";
+import { EditPlaceModal } from "@/components/features/places/EditPlaceModal";
 
 const MOSCOW_CENTER = {
   longitude: 37.6173,
@@ -19,12 +23,41 @@ const MOSCOW_CENTER = {
 
 export default function MapPage() {
   const { route, routeGeometry, alongRoutePlaces, addPlace } = useRouteStore();
+  const { user } = useAuthStore();
   const mapRef = useRef<MapRef>(null);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [hasFitBounds, setHasFitBounds] = useState(false);
   const [activePlaceId, setActivePlaceId] = useState<number | null>(null);
+  const [editingPlace, setEditingPlace] = useState<PlaceFeature | null>(null);
+
+  const handleMapPlaceUpdate = (updatedPlace: PlaceFeature) => {
+    useRouteStore.setState((state) => ({
+      route: state.route.map((p) => (p.id === updatedPlace.id ? updatedPlace : p)),
+      alongRoutePlaces: state.alongRoutePlaces.map((p) => (p.id === updatedPlace.id ? updatedPlace : p)),
+    }));
+  };
+
+  const handleMapPlaceDelete = async (id: number, title: string) => {
+    if (window.confirm(`Вы уверены, что хотите удалить место "${title}"?`)) {
+      try {
+        const ok = await deletePlace(id);
+        if (ok) {
+          toast.success("Место удалено");
+          useRouteStore.setState((state) => ({
+            route: state.route.filter((p) => p.id !== id),
+            alongRoutePlaces: state.alongRoutePlaces.filter((p) => p.id !== id),
+          }));
+          setActivePlaceId(null);
+        } else {
+          toast.error("Не удалось удалить место");
+        }
+      } catch (err) {
+        toast.error("Ошибка при удалении");
+      }
+    }
+  };
 
   const geojsonRoute = useMemo(() => {
     if (!routeGeometry) return null;
@@ -194,10 +227,10 @@ export default function MapPage() {
                 {/* Tooltip on hover or active */}
                 <div 
                   className={cn(
-                    "absolute bottom-full mb-3 left-1/2 -translate-x-1/2 transition-[opacity,transform] duration-200 pointer-events-none z-20 w-[220px] [backface-visibility:hidden] [transform-style:preserve-3d]",
+                    "absolute bottom-full mb-3 left-1/2 -translate-x-1/2 transition-[opacity,transform] duration-200 z-20 w-[220px] [backface-visibility:hidden] [transform-style:preserve-3d]",
                     activePlaceId === place.id
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"
+                      ? "opacity-100 translate-y-0 pointer-events-auto"
+                      : "opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 pointer-events-none"
                   )}
                 >
                   <div className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-2xl border border-zinc-200 dark:border-zinc-700 rounded-2xl p-2 flex items-start gap-2">
@@ -211,10 +244,33 @@ export default function MapPage() {
                     ) : (
                       <div className="h-12 w-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 shrink-0" />
                     )}
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="text-[12px] font-bold leading-tight line-clamp-1">{place.properties.title}</p>
                       {place.properties.description && (
                         <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-2 leading-snug">{place.properties.description}</p>
+                      )}
+                      
+                      {user?.is_staff && (
+                        <div className="flex gap-1.5 mt-2 pt-1.5 border-t border-border/40 select-none">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingPlace(place);
+                            }}
+                            className="flex-1 bg-accent/10 hover:bg-accent/20 text-accent text-[9px] font-bold py-1 rounded-full transition-all text-center active:scale-95"
+                          >
+                            Ред.
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMapPlaceDelete(place.id, place.properties.title);
+                            }}
+                            className="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[9px] font-bold py-1 rounded-full transition-all text-center active:scale-95"
+                          >
+                            Удал.
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -278,6 +334,29 @@ export default function MapPage() {
                           >
                             Добавить в маршрут
                           </button>
+                          
+                          {user?.is_staff && (
+                            <div className="flex gap-1.5 mt-1 select-none">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingPlace(place);
+                                }}
+                                className="flex-1 bg-accent/10 hover:bg-accent/20 text-accent text-[9px] font-bold py-1 rounded-full transition-all text-center active:scale-95"
+                              >
+                                Ред.
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMapPlaceDelete(place.id, place.properties.title);
+                                }}
+                                className="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[9px] font-bold py-1 rounded-full transition-all text-center active:scale-95"
+                              >
+                                Удал.
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -293,6 +372,14 @@ export default function MapPage() {
         <RouteBottomSheet 
           onSelectPlace={handleSelectPlace}
           activePlaceId={activePlaceId}
+        />
+      )}
+
+      {editingPlace && (
+        <EditPlaceModal
+          place={editingPlace}
+          onClose={() => setEditingPlace(null)}
+          onUpdate={handleMapPlaceUpdate}
         />
       )}
     </div>

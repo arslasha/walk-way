@@ -69,6 +69,14 @@ export function ExploreFeed({ initialPlaces, initialHasNextPage, filters }: Expl
     }
   };
 
+  const handleUpdatePlace = (updatedPlace: PlaceFeature) => {
+    setPlaces((prev) => prev.map((p) => (p.id === updatedPlace.id ? updatedPlace : p)));
+  };
+
+  const handleDeletePlace = (id: number) => {
+    setPlaces((prev) => prev.filter((p) => p.id !== id));
+  };
+
   const otherPlaces = useMemo(() => {
     if (alongRoutePlaces.length === 0) {
       return places;
@@ -102,7 +110,12 @@ export function ExploreFeed({ initialPlaces, initialHasNextPage, filters }: Expl
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {alongRoutePlaces.map((place) => (
-                <PlaceCard key={place.id} place={place} />
+                <PlaceCard
+                  key={place.id}
+                  place={place}
+                  onUpdate={handleUpdatePlace}
+                  onDelete={handleDeletePlace}
+                />
               ))}
             </div>
           )}
@@ -115,7 +128,12 @@ export function ExploreFeed({ initialPlaces, initialHasNextPage, filters }: Expl
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {otherPlaces.map((place) => (
-            <PlaceCard key={place.id} place={place} />
+            <PlaceCard
+              key={place.id}
+              place={place}
+              onUpdate={handleUpdatePlace}
+              onDelete={handleDeletePlace}
+            />
           ))}
         </div>
         

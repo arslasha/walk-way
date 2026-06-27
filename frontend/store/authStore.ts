@@ -7,6 +7,7 @@ export interface User {
   bio: string;
   avatar: string | null;
   is_2fa_enabled: boolean;
+  is_staff: boolean;
 }
 
 export interface TwoFactorEnableResponse {

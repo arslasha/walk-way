@@ -10,20 +10,23 @@ class Command(BaseCommand):
         ("Романтично", "романтично"),
         ("Уютно", "уютно"),
         ("Эстетично", "эстетично"),
-        ("Мрачно", "мрачно"),
-        ("Шумно", "шумно"),
-        ("Для интровертов", "для-интровертов"),
-        ("Для первого свидания", "для-первого-свидания"),
-        ("Для глубоких бесед", "для-глубоких-бесед"),
-        ("Подумать", "подумать"),
-        ("Почиллить", "почиллить"),
-        ("Приключения", "приключения")
+        ("Мрачно", "mracno"),
+        ("Шумно", "sumno"),
+        ("Для интровертов", "dlya-introvertov"),
+        ("Для первого свидания", "dlya-pervogo-svidaniya"),
+        ("Для глубоких бесед", "dlya-glubokih-besed"),
+        ("Подумать", "podumat"),
+        ("Для отдыха", "dlya-otdyha"),
+        ("Приключения", "priklyucheniya"),
+        ("Для всей семьи", "dlya-vsey-semyi"),
+        ("Необычное место", "neobychnoe-mesto"),
+        ("Активно", "aktivno")
     ]
 
     # Category mapping to vibe names
     CATEGORY_VIBES = {
-        "park": ["Почиллить", "Эстетично", "Для интровертов"],
-        "prirodnyj-zapovednik": ["Почиллить", "Эстетично", "Для интровертов"],
+        "park": ["Для отдыха", "Эстетично", "Для интровертов"],
+        "prirodnyj-zapovednik": ["Для отдыха", "Эстетично", "Для интровертов"],
         "restaurants": ["Шумно", "Для первого свидания", "Романтично"],
         "bar": ["Шумно", "Для первого свидания", "Романтично"],
         "clubs": ["Шумно", "Приключения"],
@@ -34,16 +37,19 @@ class Command(BaseCommand):
         "cinema": ["Для первого свидания", "Уютно"],
         "anticafe": ["Приключения", "Уютно"],
         "questroom": ["Приключения", "Уютно"],
+        "recreation": ["Приключения", "Шумно"],
+        "attractions": ["Эстетично", "Подумать"],
+        "photo-places": ["Эстетично", "Романтично"],
     }
 
     # Category mapping to icebreakers
     CATEGORY_ICEBREAKERS = {
         "park": [
-            "Устройте мини-соревнование: кто первым заметит белку или самое необычное дерево на этой тропинке?",
+            "Устройте mini-соревнование: кто первым заметит белку или самое необычное дерево на этой тропинке?",
             "Спроси партнера, любит ли он гулять под теплым летним дождем или предпочитает исключительно ясную погоду."
         ],
         "prirodnyj-zapovednik": [
-            "Устройте мини-соревнование: кто первым заметит белку или самое необычное дерево на этой тропинке?",
+            "Устройте mini-соревнование: кто первым заметит белку или самое необычное дерево на этой тропинке?",
             "Спроси партнера, любит ли он гулять под теплым летним дождем или предпочитает исключительно ясную погоду."
         ],
         "restaurants": [
@@ -86,9 +92,21 @@ class Command(BaseCommand):
             "Спроси собеседника, в какой квест или настольную игру он мечтает сыграть в большой компании.",
             "Сыграйте в быструю партию в крестики-нолики на желание!"
         ],
+        "recreation": [
+            "Каким активным видом спорта ты увлекаешься или хотел бы попробовать?",
+            "Любишь ли ты скорость и адреналин так же, как и размеренные прогулки?"
+        ],
+        "attractions": [
+            "Как думаешь, какая история или легенда скрывается за этим местом?",
+            "Если бы ты проводил экскурсию по нашему городу, куда бы мы отправились в первую очередь?"
+        ],
+        "photo-places": [
+            "Какой кадр, сделанный в этом месте, лучше всего передал бы сегодняшнее настроение?",
+            "Любишь ли ты больше фотографировать сам или быть в кадре?"
+        ],
     }
 
-    DEFAULT_VIBES = ["Почиллить", "Подумать"]
+    DEFAULT_VIBES = ["Для отдыха", "Подумать"]
     DEFAULT_ICEBREAKERS = [
         "Расскажи о своем самом запоминающемся приключении в этом городе за последний год.",
         "Если бы ты мог переместиться в любую точку мира прямо сейчас, куда бы ты отправился?"
@@ -119,13 +137,48 @@ class Command(BaseCommand):
             for place in places_qs:
                 cat_slug = place.category.slug if place.category else ""
                 
-                # Determine vibe names
-                vibe_names = self.CATEGORY_VIBES.get(cat_slug, self.DEFAULT_VIBES)
+                # Determine base vibe names from category
+                vibe_names = set(self.CATEGORY_VIBES.get(cat_slug, self.DEFAULT_VIBES))
+                
+                # Dynamic keyword matching based on title, description, and existing non-vibe tags
+                text_to_scan = f"{place.title or ''} {place.description or ''}".lower()
+                existing_tag_names = [t.name.lower() for t in place.tags.filter(is_vibe=False)]
+                
+                def contains_any(keywords):
+                    return any(kw in text_to_scan for kw in keywords) or any(any(kw in t for kw in keywords) for t in existing_tag_names)
+                
+                # Apply rules
+                if contains_any(["семейн", "детск", "семья", "ребенок", "детям", "всей семьей", "родител"]):
+                    vibe_names.add("Для всей семьи")
+                if contains_any(["необычн", "уникальн", "арт-объект", "странн", "удив", "экзотич", "секретн", "потай"]):
+                    vibe_names.add("Необычное место")
+                if contains_any(["активн", "спорт", "картинг", "дрифт", "прокат", "велосипед", "скалодром", "батут", "веревоч", "сноуборд", "лыжи"]):
+                    vibe_names.add("Активно")
+                if contains_any(["романтич", "свидан", "влюблен", "пароч", "для двоих", "свидание"]):
+                    vibe_names.add("Романтично")
+                    vibe_names.add("Для первого свидания")
+                if contains_any(["уютн", "лампов", "домашн", "камин", "мягк", "тепл"]):
+                    vibe_names.add("Уютно")
+                if contains_any(["тишин", "спокой", "уединен", "интроверт", "тихий", "безлюд", "скрыт"]):
+                    vibe_names.add("Для интровертов")
+                    vibe_names.discard("Шумно")
+                if contains_any(["шумн", "громк", "танц", "веселье", "диджей", "dj", "вечеринк", "концерт", "тусов"]):
+                    vibe_names.add("Шумно")
+                    vibe_names.discard("Для интровертов")
+                if contains_any(["лекци", "истори", "философ", "подум", "книг", "библио", "чтен", "наук", "лекторий"]):
+                    vibe_names.add("Подумать")
+                    vibe_names.add("Для глубоких бесед")
+                if contains_any(["красив", "архитект", "эстет", "вид на", "панорам", "фотограф", "живопис", "искусств", "галере"]):
+                    vibe_names.add("Эстетично")
+                if contains_any(["отдых", "прогул", "чилл", "расслаб", "релакс", "пляж", "шезлонг", "скамейк"]):
+                    vibe_names.add("Для отдыха")
+                
                 # Determine icebreakers
                 icebreakers = self.CATEGORY_ICEBREAKERS.get(cat_slug, self.DEFAULT_ICEBREAKERS)
 
                 # Add vibe tags
                 place_tags = [tag_objects[name] for name in vibe_names]
+                place.tags.remove(*place.tags.filter(is_vibe=True))
                 place.tags.add(*place_tags)
 
                 # Update place fields

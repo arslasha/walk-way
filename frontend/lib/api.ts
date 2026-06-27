@@ -2,14 +2,11 @@ import { PlaceFeatureCollection, PlaceFeature, Category, Tag, PlaceFilters } fro
 
 const getApiBaseUrl = () => {
   if (typeof window === "undefined") {
-    return process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
+    // Server-side (inside Docker, fetch from the "web" container on port 8000)
+    return process.env.NEXT_PUBLIC_API_URL_INTERNAL || "http://web:8000/api/v1";
   }
-  // In the browser, check if environment URL is a valid external URL
-  const envUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (envUrl && !envUrl.includes("//web:") && !envUrl.includes("//web/")) {
-    return envUrl;
-  }
-  return "http://127.0.0.1:8000/api/v1";
+  // Client-side (in the browser, fetch from the host machine on port 8001)
+  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api/v1";
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -119,5 +116,33 @@ export async function getPlacesAlongRoute(
     throw new Error("Failed to fetch places along route");
   }
   return res.json();
+}
+
+export async function updatePlace(
+  id: number,
+  data: { description: string; tag_ids: number[]; category_id: number }
+): Promise<PlaceFeature | null> {
+  const token = typeof window !== "undefined" ? localStorage.getItem("walkway_access_token") : null;
+  const res = await fetch(`${API_BASE_URL}/places/${id}/`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function deletePlace(id: number): Promise<boolean> {
+  const token = typeof window !== "undefined" ? localStorage.getItem("walkway_access_token") : null;
+  const res = await fetch(`${API_BASE_URL}/places/${id}/`, {
+    method: "DELETE",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+  return res.ok;
 }
 

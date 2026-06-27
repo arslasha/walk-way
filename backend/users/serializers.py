@@ -59,14 +59,15 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
+    is_staff = serializers.BooleanField(source='user.is_staff', read_only=True)
     avatar = serializers.ImageField(required=False, allow_null=True, error_messages={
         'invalid_image': 'Невалидный или поврежденный файл изображения',
     })
 
     class Meta:
         model = UserProfile
-        fields = ('email', 'username', 'nickname', 'bio', 'avatar', 'is_2fa_enabled')
-        read_only_fields = ('is_2fa_enabled',)
+        fields = ('email', 'username', 'nickname', 'bio', 'avatar', 'is_2fa_enabled', 'is_staff')
+        read_only_fields = ('is_2fa_enabled', 'is_staff')
 
     def validate_nickname(self, value):
         user = self.context['request'].user

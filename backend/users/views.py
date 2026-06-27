@@ -47,7 +47,8 @@ class UserRegisterView(generics.CreateAPIView):
                 'email': user.email,
                 'nickname': profile.nickname,
                 'bio': profile.bio,
-                'is_2fa_enabled': profile.is_2fa_enabled
+                'is_2fa_enabled': profile.is_2fa_enabled,
+                'is_staff': user.is_staff
             },
             'tokens': tokens
         }, status=status.HTTP_201_CREATED)
@@ -90,7 +91,8 @@ class UserLoginView(APIView):
                 'nickname': profile.nickname,
                 'bio': profile.bio,
                 'avatar': profile.avatar.url if profile.avatar else None,
-                'is_2fa_enabled': profile.is_2fa_enabled
+                'is_2fa_enabled': profile.is_2fa_enabled,
+                'is_staff': user.is_staff
             },
             'tokens': tokens
         }, status=status.HTTP_200_OK)
@@ -135,7 +137,7 @@ class TwoFactorVerifyView(APIView):
         # 2. Check TOTP code if not backup match
         if not backup_match:
             totp = pyotp.TOTP(profile.otp_secret)
-            if not totp.verify(code):
+            if not totp.verify(code, valid_window=2):
                 return Response(
                     {"error": "Неверный код двухфакторной аутентификации"},
                     status=status.HTTP_400_BAD_REQUEST
@@ -148,7 +150,8 @@ class TwoFactorVerifyView(APIView):
                 'nickname': profile.nickname,
                 'bio': profile.bio,
                 'avatar': profile.avatar.url if profile.avatar else None,
-                'is_2fa_enabled': profile.is_2fa_enabled
+                'is_2fa_enabled': profile.is_2fa_enabled,
+                'is_staff': user.is_staff
             },
             'tokens': tokens
         }, status=status.HTTP_200_OK)
@@ -210,7 +213,7 @@ class TwoFactorConfirmView(APIView):
             )
 
         totp = pyotp.TOTP(profile.otp_secret)
-        if not totp.verify(code):
+        if not totp.verify(code, valid_window=2):
             return Response(
                 {"error": "Неверный код TOTP"},
                 status=status.HTTP_400_BAD_REQUEST
@@ -258,7 +261,7 @@ class TwoFactorDisableView(APIView):
         # 2. Check TOTP
         if not code_valid and profile.otp_secret:
             totp = pyotp.TOTP(profile.otp_secret)
-            if totp.verify(code):
+            if totp.verify(code, valid_window=2):
                 code_valid = True
 
         if not code_valid:

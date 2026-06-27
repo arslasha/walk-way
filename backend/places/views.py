@@ -11,9 +11,20 @@ from .serializers import CategorySerializer, TagSerializer, PlaceSerializer
 from .filters import PlaceFilter
 from .services import ORSClient
 
-class PlaceViewSet(viewsets.ReadOnlyModelViewSet):
+from rest_framework import permissions
+
+class IsAdminOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        if getattr(view, 'action', None) == 'along_route':
+            return True
+        return request.user and request.user.is_authenticated and request.user.is_staff
+
+class PlaceViewSet(viewsets.ModelViewSet):
     queryset = Place.objects.filter(is_active=True).select_related('category').prefetch_related('tags').order_by('id')
     serializer_class = PlaceSerializer
+    permission_classes = [IsAdminOrReadOnly]
     filter_backends = (filters.DjangoFilterBackend, InBBoxFilter)
     filterset_class = PlaceFilter
     bbox_filter_field = 'location'
@@ -65,11 +76,20 @@ class RouteCalculateView(APIView):
         
         if is_loop:
             start_coords = request.data.get('start_coords') or request.data.get('coordinates', [])
-            if not start_coords or len(start_coords) < 2:
+            
+            if not isinstance(start_coords, (list, tuple)):
+                return Response({'error': 'start_coords must be a list or tuple.'}, status=status.HTTP_400_BAD_REQUEST)
+                
+            if len(start_coords) == 0:
                 return Response({'error': 'start_coords [lon, lat] is required for loop routes.'}, status=status.HTTP_400_BAD_REQUEST)
                 
-            if isinstance(start_coords[0], list):
+            if isinstance(start_coords[0], (list, tuple)):
                 start_coords = start_coords[0]
+                if not isinstance(start_coords, (list, tuple)):
+                    return Response({'error': 'start_coords must be a list or tuple.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            if len(start_coords) < 2:
+                return Response({'error': 'start_coords must contain both longitude and latitude.'}, status=status.HTTP_400_BAD_REQUEST)
                 
             try:
                 start_lon, start_lat = float(start_coords[0]), float(start_coords[1])
@@ -78,7 +98,7 @@ class RouteCalculateView(APIView):
                 distance = float(request.data.get('distance', 3000))
                 if distance <= 0:
                     return Response({'error': 'Distance must be positive.'}, status=status.HTTP_400_BAD_REQUEST)
-            except (ValueError, TypeError):
+            except (ValueError, TypeError, IndexError, KeyError):
                 return Response({'error': 'Invalid format for start_coords or distance.'}, status=status.HTTP_400_BAD_REQUEST)
                 
             vibe_slugs = request.data.get('vibes', [])

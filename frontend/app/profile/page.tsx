@@ -48,6 +48,7 @@ export default function ProfilePage() {
     isLoading: collectionsLoading,
     fetchCollections,
     createCollection,
+    updateCollection,
     deleteCollection,
     removePlace: removePlaceFromCollection,
   } = useCollectionStore();
@@ -61,6 +62,12 @@ export default function ProfilePage() {
   const [newFolderDesc, setNewFolderDesc] = useState("");
   const [newFolderPublic, setNewFolderPublic] = useState(true);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  // Edit collection state
+  const [editingCollectionId, setEditingCollectionId] = useState<number | null>(null);
+  const [editCollectionName, setEditCollectionName] = useState("");
+  const [editCollectionDesc, setEditCollectionDesc] = useState("");
+  const [editCollectionPublic, setEditCollectionPublic] = useState(true);
 
   // Edit profile state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -425,7 +432,7 @@ export default function ProfilePage() {
                         className="flex w-full items-center gap-2 rounded-[28px] border border-dashed border-border px-5 py-4 text-sm font-semibold text-muted-foreground hover:border-accent hover:text-accent transition-all active:scale-[0.99]"
                       >
                         <Plus className="h-4 w-4" />
-                        создать новую папку
+                        новая папка
                       </button>
                     )}
 
@@ -442,76 +449,161 @@ export default function ProfilePage() {
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        {collections.map((c) => (
-                          <div key={c.id} className="rounded-[28px] border border-border bg-surface-raised p-5">
-                            <div className="flex items-start justify-between gap-3 mb-3">
-                              <div className="flex items-center gap-3 flex-1 min-w-0">
-                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
-                                  <Folder className="h-4 w-4" />
+                        {collections.map((c) => {
+                          if (editingCollectionId === c.id) {
+                            return (
+                              <div key={c.id} className="rounded-[28px] border border-accent bg-surface-raised p-5 space-y-3">
+                                <div>
+                                  <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Название</label>
+                                  <input
+                                    type="text"
+                                    value={editCollectionName}
+                                    onChange={(e) => setEditCollectionName(e.target.value)}
+                                    className="w-full mt-1 px-3 py-2 rounded-xl border border-border bg-surface text-sm focus:outline-none focus:border-accent text-foreground"
+                                  />
                                 </div>
-                                <div className="min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <p className="font-bold text-foreground text-sm truncate">{c.name}</p>
-                                    {c.is_public ? (
-                                      <span className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
-                                        <Globe className="h-2.5 w-2.5" />публичная
-                                      </span>
-                                    ) : (
-                                      <span className="flex items-center gap-1 rounded-full bg-surface px-2 py-0.5 text-[10px] font-bold text-muted-foreground shrink-0">
-                                        <Lock className="h-2.5 w-2.5" />приватная
-                                      </span>
+                                <div>
+                                  <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Описание</label>
+                                  <textarea
+                                    value={editCollectionDesc}
+                                    onChange={(e) => setEditCollectionDesc(e.target.value)}
+                                    className="w-full mt-1 px-3 py-2 rounded-xl border border-border bg-surface text-sm focus:outline-none focus:border-accent text-foreground resize-none h-16"
+                                  />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-muted-foreground">Публичная папка (видят все)</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditCollectionPublic(!editCollectionPublic)}
+                                    className={cn(
+                                      "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                                      editCollectionPublic ? "bg-accent" : "bg-muted"
                                     )}
-                                  </div>
-                                  {c.description && <p className="text-xs text-muted-foreground mt-0.5 truncate">{c.description}</p>}
-                                  <p className="text-xs text-muted-foreground mt-0.5">{c.places_count} {c.places_count === 1 ? "место" : c.places_count >= 2 && c.places_count <= 4 ? "места" : "мест"}</p>
+                                  >
+                                    <span
+                                      className={cn(
+                                        "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                                        editCollectionPublic ? "translate-x-4" : "translate-x-0"
+                                      )}
+                                    />
+                                  </button>
                                 </div>
-                              </div>
-                              {deletingId === c.id ? (
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs text-muted-foreground">Удалить?</span>
+                                <div className="flex justify-end gap-2 pt-2">
+                                  <button
+                                    onClick={() => setEditingCollectionId(null)}
+                                    className="px-3 py-1.5 rounded-full text-xs font-bold text-muted-foreground hover:bg-secondary transition-all"
+                                  >
+                                    Отмена
+                                  </button>
                                   <button
                                     onClick={async () => {
-                                      const ok = await deleteCollection(c.id);
-                                      if (ok) toast.success("Папка удалена");
-                                      else toast.error("Не удалось удалить");
-                                      setDeletingId(null);
+                                      if (!editCollectionName.trim()) {
+                                        toast.error("Название не может быть пустым");
+                                        return;
+                                      }
+                                      const ok = await updateCollection(c.id, editCollectionName, editCollectionDesc, editCollectionPublic);
+                                      if (ok) {
+                                        toast.success("Папка обновлена");
+                                        setEditingCollectionId(null);
+                                      } else {
+                                        toast.error("Не удалось обновить папку");
+                                      }
                                     }}
-                                    className="text-xs font-bold text-red-500 hover:text-red-600"
-                                  >да</button>
-                                  <button onClick={() => setDeletingId(null)} className="text-xs font-bold text-muted-foreground hover:text-foreground">нет</button>
+                                    className="px-3 py-1.5 rounded-full text-xs font-bold bg-accent text-white hover:bg-accent/90 transition-all"
+                                  >
+                                    Сохранить
+                                  </button>
                                 </div>
-                              ) : (
-                                <button
-                                  onClick={() => setDeletingId(c.id)}
-                                  className="p-1.5 rounded-full text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all flex-shrink-0 active:scale-90"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </button>
-                              )}
-                            </div>
+                              </div>
+                            );
+                          }
 
-                            {/* Places inside collection */}
-                            {c.places && c.places.length > 0 && (
-                              <div className="space-y-1.5 mt-3 border-t border-border pt-3">
-                                {c.places.map((p) => (
-                                  <div key={p.id} className="flex items-center gap-2 rounded-full bg-surface px-3 py-1.5 text-xs">
-                                    <MapPin className="h-3 w-3 text-accent flex-shrink-0" />
-                                    <span className="flex-1 truncate text-foreground font-medium">{p.title}</span>
+                          return (
+                            <div key={c.id} className="rounded-[28px] border border-border bg-surface-raised p-5">
+                              <div className="flex items-start justify-between gap-3 mb-3">
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
+                                    <Folder className="h-4 w-4" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <p className="font-bold text-foreground text-sm truncate">{c.name}</p>
+                                      {c.is_public ? (
+                                        <span className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
+                                          <Globe className="h-2.5 w-2.5" />публичная
+                                        </span>
+                                      ) : (
+                                        <span className="flex items-center gap-1 rounded-full bg-surface px-2 py-0.5 text-[10px] font-bold text-muted-foreground shrink-0">
+                                          <Lock className="h-2.5 w-2.5" />приватная
+                                        </span>
+                                      )}
+                                    </div>
+                                    {c.description && <p className="text-xs text-muted-foreground mt-0.5 truncate">{c.description}</p>}
+                                    <p className="text-xs text-muted-foreground mt-0.5">{c.places_count} {c.places_count === 1 ? "место" : c.places_count >= 2 && c.places_count <= 4 ? "места" : "мест"}</p>
+                                  </div>
+                                </div>
+                                {deletingId === c.id ? (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-muted-foreground">Удалить?</span>
                                     <button
                                       onClick={async () => {
-                                        const ok = await removePlaceFromCollection(c.id, p.id);
-                                        if (ok) toast.success("Место удалено из папки");
+                                        const ok = await deleteCollection(c.id);
+                                        if (ok) toast.success("Папка удалена");
+                                        else toast.error("Не удалось удалить");
+                                        setDeletingId(null);
                                       }}
-                                      className="text-muted-foreground hover:text-red-500 transition-colors flex-shrink-0 active:scale-90"
+                                      className="text-xs font-bold text-red-500 hover:text-red-600"
+                                    >да</button>
+                                    <button onClick={() => setDeletingId(null)} className="text-xs font-bold text-muted-foreground hover:text-foreground">нет</button>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    <button
+                                      onClick={() => {
+                                        setEditingCollectionId(c.id);
+                                        setEditCollectionName(c.name);
+                                        setEditCollectionDesc(c.description || "");
+                                        setEditCollectionPublic(c.is_public);
+                                      }}
+                                      className="p-1.5 rounded-full text-muted-foreground hover:text-accent hover:bg-accent/10 transition-all flex-shrink-0 active:scale-90"
+                                      title="Редактировать"
                                     >
-                                      <X className="h-3 w-3" />
+                                      <Edit3 className="h-3.5 w-3.5" />
+                                    </button>
+                                    <button
+                                      onClick={() => setDeletingId(c.id)}
+                                      className="p-1.5 rounded-full text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all flex-shrink-0 active:scale-90"
+                                      title="Удалить"
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
                                     </button>
                                   </div>
-                                ))}
+                                )}
                               </div>
-                            )}
-                          </div>
-                        ))}
+
+                              {/* Places inside collection */}
+                              {c.places && c.places.length > 0 && (
+                                <div className="space-y-1.5 mt-3 border-t border-border pt-3">
+                                  {c.places.map((p) => (
+                                    <div key={p.id} className="flex items-center gap-2 rounded-full bg-surface px-3 py-1.5 text-xs">
+                                      <MapPin className="h-3 w-3 text-accent flex-shrink-0" />
+                                      <span className="flex-1 truncate text-foreground font-medium">{p.title}</span>
+                                      <button
+                                        onClick={async () => {
+                                          const ok = await removePlaceFromCollection(c.id, p.id);
+                                          if (ok) toast.success("Место удалено из папки");
+                                        }}
+                                        className="text-muted-foreground hover:text-red-500 transition-colors flex-shrink-0 active:scale-90"
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

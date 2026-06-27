@@ -28,6 +28,7 @@ interface CollectionState {
 
   fetchCollections: () => Promise<void>;
   createCollection: (name: string, description: string, isPublic: boolean) => Promise<Collection | null>;
+  updateCollection: (id: number, name: string, description: string, isPublic: boolean) => Promise<boolean>;
   deleteCollection: (id: number) => Promise<boolean>;
   addPlace: (collectionId: number, placeId: number) => Promise<boolean>;
   removePlace: (collectionId: number, placeId: number) => Promise<boolean>;
@@ -88,6 +89,30 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
     } catch (err: any) {
       set({ error: err.message, isLoading: false });
       return null;
+    }
+  },
+
+  updateCollection: async (id, name, description, isPublic) => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await fetch(getApiUrl(`/collections/${id}/`), {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify({ name, description, is_public: isPublic }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Ошибка обновления коллекции");
+      set((state) => ({
+        collections: state.collections.map((c) => (c.id === id ? { ...c, ...data } : c)),
+        isLoading: false,
+      }));
+      return true;
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false });
+      return false;
     }
   },
 
